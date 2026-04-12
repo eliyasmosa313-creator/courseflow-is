@@ -1,17 +1,23 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Plus, Clock, Copy, Check, Users, UserPlus } from "lucide-react";
+import { ArrowLeft, Plus, Clock, Copy, Check, Users, UserPlus, Pencil, Trash2 } from "lucide-react";
 import Button from "@/components/Button";
 
 const CourseDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [copiedCode, setCopiedCode] = useState(false);
   const [showCreateSession, setShowCreateSession] = useState(false);
   const [showEnroll, setShowEnroll] = useState(false);
   const [showJoinCode, setShowJoinCode] = useState(false);
+  const [showEditCourse, setShowEditCourse] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editInstructor, setEditInstructor] = useState("");
 
   // Session form
   const [sessionTitle, setSessionTitle] = useState("");
@@ -119,6 +125,49 @@ const CourseDetail = () => {
     },
   });
 
+  const updateCourse = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("courses")
+        .update({ title: editTitle, description: editDescription, instructor_name: editInstructor })
+        .eq("id", id!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["course", id] });
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      setShowEditCourse(false);
+    },
+  });
+
+  const deleteCourse = useMutation({
+    mutationFn: async () => {
+      const { data: sessions } = await supabase.from("sessions").select("id").eq("course_id", id!);
+      if (sessions?.length) {
+        const sessionIds = sessions.map(s => s.id);
+        await supabase.from("session_materials").delete().in("session_id", sessionIds);
+        await supabase.from("session_assignments").delete().in("session_id", sessionIds);
+        await supabase.from("session_attendance").delete().in("session_id", sessionIds);
+        await supabase.from("session_grades").delete().in("session_id", sessionIds);
+      }
+      await supabase.from("sessions").delete().eq("course_id", id!);
+      await supabase.from("course_enrollments").delete().eq("course_id", id!);
+      const { error } = await supabase.from("courses").delete().eq("id", id!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      navigate("/courses");
+    },
+  });
+
+  const openEditCourse = () => {
+    setEditTitle(course?.title || "");
+    setEditDescription(course?.description || "");
+    setEditInstructor(course?.instructor_name || "");
+    setShowEditCourse(true);
+  };
+
   const statusColors: Record<string, string> = {
     draft: "bg-foreground/10",
     scheduled: "bg-vibrant-blue",
@@ -174,6 +223,12 @@ const CourseDetail = () => {
         </Button>
         <Button variant="transparent" onClick={() => setShowJoinCode(true)}>
           <Users className="w-4 h-4 mr-2" /> JOIN WITH CODE
+        </Button>
+        <Button variant="transparent" onClick={openEditCourse}>
+          <Pencil className="w-4 h-4 mr-2" /> EDIT COURSE
+        </Button>
+        <Button variant="transparent" onClick={() => setShowDeleteConfirm(true)}>
+          <Trash2 className="w-4 h-4 mr-2 text-accent-red" /> DELETE
         </Button>
       </div>
 
@@ -241,6 +296,50 @@ const CourseDetail = () => {
                 <Button variant="filled" onClick={() => joinCourse.mutate()} className="flex-1">JOIN</Button>
                 <Button variant="transparent" onClick={() => setShowJoinCode(false)} className="flex-1">CANCEL</Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Edit Course */}
+      {showEditCourse && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-3xl p-8 w-full max-w-lg">
+            <h2 className="text-2xl font-extrabold uppercase tracking-tight font-sans mb-6">EDIT COURSE</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">Title</label>
+                <input value={editTitle} onChange={e => setEditTitle(e.target.value)} className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">Instructor</label>
+                <input value={editInstructor} onChange={e => setEditInstructor(e.target.value)} className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">Description</label>
+                <textarea value={editDescription} onChange={e => setEditDescription(e.target.value)} rows={3} className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="filled" onClick={() => updateCourse.mutate()} className="flex-1">SAVE</Button>
+                <Button variant="transparent" onClick={() => setShowEditCourse(false)} className="flex-1">CANCEL</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Delete Confirmation */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-3xl p-8 w-full max-w-md text-center">
+            <Trash2 className="w-12 h-12 mx-auto text-accent-red mb-4" />
+            <h2 className="text-2xl font-extrabold uppercase tracking-tight font-sans mb-2">DELETE COURSE?</h2>
+            <p className="text-foreground/60 font-serif text-sm mb-6">
+              This will permanently delete this course and all its sessions, materials, assignments, grades, and enrollments.
+            </p>
+            <div className="flex gap-3">
+              <Button variant="filled" onClick={() => deleteCourse.mutate()} className="flex-1 !bg-accent-red">DELETE</Button>
+              <Button variant="transparent" onClick={() => setShowDeleteConfirm(false)} className="flex-1">CANCEL</Button>
             </div>
           </div>
         </div>

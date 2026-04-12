@@ -2,16 +2,18 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, BookOpen, Users, Copy, Check } from "lucide-react";
+import { Plus, BookOpen, Users, Copy, Check, Pencil, Trash2 } from "lucide-react";
 import Button from "@/components/Button";
 
 const Courses = () => {
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<any>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [instructorName, setInstructorName] = useState("");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [deletingCourseId, setDeletingCourseId] = useState<string | null>(null);
 
   const { data: courses, isLoading } = useQuery({
     queryKey: ["courses"],
@@ -42,6 +44,53 @@ const Courses = () => {
       setInstructorName("");
     },
   });
+
+  const updateMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("courses")
+        .update({ title, description, instructor_name: instructorName })
+        .eq("id", editingCourse.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      setEditingCourse(null);
+      setTitle("");
+      setDescription("");
+      setInstructorName("");
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (courseId: string) => {
+      // Delete related data first
+      const { data: sessions } = await supabase.from("sessions").select("id").eq("course_id", courseId);
+      if (sessions?.length) {
+        const sessionIds = sessions.map(s => s.id);
+        await supabase.from("session_materials").delete().in("session_id", sessionIds);
+        await supabase.from("session_assignments").delete().in("session_id", sessionIds);
+        await supabase.from("session_attendance").delete().in("session_id", sessionIds);
+        await supabase.from("session_grades").delete().in("session_id", sessionIds);
+      }
+      await supabase.from("sessions").delete().eq("course_id", courseId);
+      await supabase.from("course_enrollments").delete().eq("course_id", courseId);
+      const { error } = await supabase.from("courses").delete().eq("id", courseId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      setDeletingCourseId(null);
+    },
+  });
+
+  const openEdit = (course: any, e: React.MouseEvent) => {
+    e.preventDefault();
+    setEditingCourse(course);
+    setTitle(course.title);
+    setDescription(course.description || "");
+    setInstructorName(course.instructor_name);
+  };
 
   const copyJoinCode = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -137,6 +186,97 @@ const Courses = () => {
         </div>
       )}
 
+      {/* Edit Course Modal */}
+      {editingCourse && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-3xl p-8 w-full max-w-lg">
+            <h2 className="text-2xl font-extrabold uppercase tracking-tight font-sans mb-6">
+              EDIT COURSE
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">
+                  Course Title
+                </label>
+                <input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">
+                  Instructor Name
+                </label>
+                <input
+                  value={instructorName}
+                  onChange={(e) => setInstructorName(e.target.value)}
+                  className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">
+                  Description
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button
+                  variant="filled"
+                  onClick={() => updateMutation.mutate()}
+                  className="flex-1"
+                >
+                  SAVE CHANGES
+                </Button>
+                <Button
+                  variant="transparent"
+                  onClick={() => setEditingCourse(null)}
+                  className="flex-1"
+                >
+                  CANCEL
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingCourseId && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-3xl p-8 w-full max-w-md text-center">
+            <Trash2 className="w-12 h-12 mx-auto text-accent-red mb-4" />
+            <h2 className="text-2xl font-extrabold uppercase tracking-tight font-sans mb-2">
+              DELETE COURSE?
+            </h2>
+            <p className="text-foreground/60 font-serif text-sm mb-6">
+              This will permanently delete the course and all its sessions, materials, assignments, grades, and enrollments.
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="filled"
+                onClick={() => deleteMutation.mutate(deletingCourseId)}
+                className="flex-1 !bg-accent-red"
+              >
+                DELETE
+              </Button>
+              <Button
+                variant="transparent"
+                onClick={() => setDeletingCourseId(null)}
+                className="flex-1"
+              >
+                CANCEL
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Course Grid */}
       {isLoading ? (
         <p className="text-foreground/50 font-sans">Loading courses...</p>
@@ -183,15 +323,36 @@ const Courses = () => {
                     </p>
                   )}
 
-                  <div className="mt-auto flex items-center gap-4 text-sm text-foreground/60 font-sans">
-                    <span className="flex items-center gap-1">
-                      <Users className="w-3.5 h-3.5" />
-                      {(course.course_enrollments as any)?.[0]?.count ?? 0} students
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <BookOpen className="w-3.5 h-3.5" />
-                      {(course.sessions as any)?.[0]?.count ?? 0} sessions
-                    </span>
+                  <div className="mt-auto flex items-center justify-between">
+                    <div className="flex items-center gap-4 text-sm text-foreground/60 font-sans">
+                      <span className="flex items-center gap-1">
+                        <Users className="w-3.5 h-3.5" />
+                        {(course.course_enrollments as any)?.[0]?.count ?? 0} students
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <BookOpen className="w-3.5 h-3.5" />
+                        {(course.sessions as any)?.[0]?.count ?? 0} sessions
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={(e) => openEdit(course, e)}
+                        className="p-2 rounded-full hover:bg-foreground/10 transition-colors"
+                        title="Edit course"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setDeletingCourseId(course.id);
+                        }}
+                        className="p-2 rounded-full hover:bg-accent-red/20 transition-colors text-accent-red"
+                        title="Delete course"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </article>
