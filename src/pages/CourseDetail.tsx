@@ -72,21 +72,36 @@ const CourseDetail = () => {
 
   const createSession = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("sessions").insert({
+      const { data: newSession, error } = await supabase.from("sessions").insert({
         course_id: id!,
         title: sessionTitle,
+        description: sessionDescription,
         scheduled_at: new Date(scheduledAt).toISOString(),
         duration_minutes: parseInt(duration),
         status: "scheduled",
-      });
+        access_type: accessType,
+      }).select().single();
       if (error) throw error;
+
+      // If selected students, insert access records
+      if (accessType === "selected" && selectedStudents.length > 0) {
+        const accessRows = selectedStudents.map(name => ({
+          session_id: newSession.id,
+          student_name: name,
+        }));
+        const { error: accessError } = await supabase.from("session_access").insert(accessRows);
+        if (accessError) throw accessError;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["course-sessions", id] });
       setShowCreateSession(false);
       setSessionTitle("");
+      setSessionDescription("");
       setScheduledAt("");
       setDuration("60");
+      setAccessType("all");
+      setSelectedStudents([]);
     },
   });
 
