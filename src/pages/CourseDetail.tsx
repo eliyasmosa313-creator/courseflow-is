@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Plus, Clock, Copy, Check, Users, UserPlus, Pencil, Trash2, Lock, Globe } from "lucide-react";
 import Button from "@/components/Button";
+import { useAuth } from "@/hooks/useAuth";
 
 const CourseDetail = () => {
   const { id } = useParams();
