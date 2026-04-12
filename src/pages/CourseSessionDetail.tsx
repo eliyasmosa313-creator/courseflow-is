@@ -248,18 +248,20 @@ const CourseSessionDetail = () => {
       {/* Materials Tab */}
       {tab === "materials" && (
         <div>
-          <div className="flex gap-3 mb-6">
-            <Button variant="filled" onClick={() => fileInputRef.current?.click()}>
-              <Upload className="w-4 h-4 mr-2" /> UPLOAD FILE
-            </Button>
-            <input ref={fileInputRef} type="file" accept=".pdf,image/*" className="hidden" onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) uploadFile.mutate(file);
-            }} />
-            <Button variant="transparent" onClick={() => setShowAddMaterial(true)}>
-              <Plus className="w-4 h-4 mr-2" /> ADD LINK/NOTE
-            </Button>
-          </div>
+          {isInstructor && (
+            <div className="flex gap-3 mb-6">
+              <Button variant="filled" onClick={() => fileInputRef.current?.click()}>
+                <Upload className="w-4 h-4 mr-2" /> UPLOAD FILE
+              </Button>
+              <input ref={fileInputRef} type="file" accept=".pdf,image/*" className="hidden" onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) uploadFile.mutate(file);
+              }} />
+              <Button variant="transparent" onClick={() => setShowAddMaterial(true)}>
+                <Plus className="w-4 h-4 mr-2" /> ADD LINK/NOTE
+              </Button>
+            </div>
+          )}
 
           {showAddMaterial && (
             <div className="rounded-3xl bg-muted p-6 mb-6">
