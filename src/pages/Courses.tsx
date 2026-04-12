@@ -7,6 +7,7 @@ import Button from "@/components/Button";
 import { useAuth } from "@/hooks/useAuth";
 
 const Courses = () => {
+  const { isInstructor, isStudent, user } = useAuth();
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
   const [editingCourse, setEditingCourse] = useState<any>(null);
