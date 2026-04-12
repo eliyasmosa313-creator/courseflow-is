@@ -108,6 +108,35 @@ export type Database = {
         }
         Relationships: []
       }
+      session_access: {
+        Row: {
+          created_at: string
+          id: string
+          session_id: string
+          student_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          session_id: string
+          student_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          session_id?: string
+          student_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_access_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       session_assignments: {
         Row: {
           created_at: string
@@ -247,8 +276,10 @@ export type Database = {
       }
       sessions: {
         Row: {
+          access_type: string
           course_id: string
           created_at: string
+          description: string | null
           duration_minutes: number
           id: string
           scheduled_at: string
@@ -257,8 +288,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          access_type?: string
           course_id: string
           created_at?: string
+          description?: string | null
           duration_minutes?: number
           id?: string
           scheduled_at: string
@@ -267,8 +300,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          access_type?: string
           course_id?: string
           created_at?: string
+          description?: string | null
           duration_minutes?: number
           id?: string
           scheduled_at?: string
