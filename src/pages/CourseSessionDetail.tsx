@@ -379,17 +379,19 @@ const CourseSessionDetail = () => {
       {/* Grades Tab */}
       {tab === "grades" && (
         <div>
-          <div className="rounded-3xl bg-muted p-6 mb-6">
-            <h3 className="text-sm font-bold uppercase tracking-wider font-sans mb-4">ADD/UPDATE GRADE</h3>
-            <div className="flex flex-wrap gap-3">
-              <select value={gradeStudentName} onChange={e => setGradeStudentName(e.target.value)} className="px-4 py-3 rounded-2xl bg-background text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary flex-1 min-w-[200px]">
-                <option value="">Select student...</option>
-                {enrollments?.map(e => <option key={e.id} value={e.student_name}>{e.student_name}</option>)}
-              </select>
-              <input type="number" min="0" max="100" value={gradeScore} onChange={e => setGradeScore(e.target.value)} className="w-24 px-4 py-3 rounded-2xl bg-background text-foreground font-sans text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary" placeholder="0-100" />
-              <Button variant="filled" onClick={() => setGrade.mutate()} disabled={!gradeStudentName || !gradeScore}>SAVE</Button>
+          {isInstructor && (
+            <div className="rounded-3xl bg-muted p-6 mb-6">
+              <h3 className="text-sm font-bold uppercase tracking-wider font-sans mb-4">ADD/UPDATE GRADE</h3>
+              <div className="flex flex-wrap gap-3">
+                <select value={gradeStudentName} onChange={e => setGradeStudentName(e.target.value)} className="px-4 py-3 rounded-2xl bg-background text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary flex-1 min-w-[200px]">
+                  <option value="">Select student...</option>
+                  {enrollments?.map(e => <option key={e.id} value={e.student_name}>{e.student_name}</option>)}
+                </select>
+                <input type="number" min="0" max="100" value={gradeScore} onChange={e => setGradeScore(e.target.value)} className="w-24 px-4 py-3 rounded-2xl bg-background text-foreground font-sans text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary" placeholder="0-100" />
+                <Button variant="filled" onClick={() => setGrade.mutate()} disabled={!gradeStudentName || !gradeScore}>SAVE</Button>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="space-y-2">
             {grades?.map((g) => {
