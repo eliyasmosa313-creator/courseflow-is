@@ -432,10 +432,22 @@ const CourseDetail = () => {
                   <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border-2 border-foreground/20 ${session.status === "live" ? "bg-accent-red text-foreground" : "bg-foreground/10"}`}>
                     {session.status === "live" ? "● LIVE" : session.status.toUpperCase()}
                   </span>
+                  <span className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-foreground/50">
+                    {(session as any).access_type === "selected" ? (
+                      <><Lock className="w-3 h-3" /> PRIVATE</>
+                    ) : (
+                      <><Globe className="w-3 h-3" /> ALL</>
+                    )}
+                  </span>
                 </div>
-                <h3 className="text-xl font-extrabold uppercase tracking-tighter font-sans leading-[0.85] mb-3">
+                <h3 className="text-xl font-extrabold uppercase tracking-tighter font-sans leading-[0.85] mb-2">
                   {session.title}
                 </h3>
+                {(session as any).description && (
+                  <p className="text-sm text-foreground/60 font-serif mb-3 line-clamp-2">
+                    {(session as any).description}
+                  </p>
+                )}
                 <div className="flex items-center gap-3 text-sm text-foreground/60 font-sans">
                   <span className="flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5" />
