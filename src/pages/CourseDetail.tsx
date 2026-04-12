@@ -21,8 +21,11 @@ const CourseDetail = () => {
 
   // Session form
   const [sessionTitle, setSessionTitle] = useState("");
+  const [sessionDescription, setSessionDescription] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
   const [duration, setDuration] = useState("60");
+  const [accessType, setAccessType] = useState<"all" | "selected">("all");
+  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
 
   // Enroll form
   const [studentName, setStudentName] = useState("");
