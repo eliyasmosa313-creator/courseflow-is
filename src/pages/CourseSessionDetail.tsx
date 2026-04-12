@@ -342,23 +342,25 @@ const CourseSessionDetail = () => {
       {/* Attendance Tab */}
       {tab === "attendance" && (
         <div>
-          <div className="rounded-3xl bg-muted p-6 mb-6">
-            <h3 className="text-sm font-bold uppercase tracking-wider font-sans mb-4">MARK ATTENDANCE</h3>
-            <div className="flex flex-wrap gap-3">
-              <select value={attStudentName} onChange={e => setAttStudentName(e.target.value)} className="px-4 py-3 rounded-2xl bg-background text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary flex-1 min-w-[200px]">
-                <option value="">Select student...</option>
-                {enrollments?.map(e => <option key={e.id} value={e.student_name}>{e.student_name}</option>)}
-              </select>
-              <div className="flex gap-2">
-                {(["present", "absent", "late"] as const).map(s => (
-                  <button key={s} onClick={() => setAttStatus(s)} className={cn("px-4 py-2.5 rounded-full text-xs font-bold uppercase", attStatus === s ? "bg-foreground text-background" : "bg-foreground/10")}>
-                    {s}
-                  </button>
-                ))}
+          {isInstructor && (
+            <div className="rounded-3xl bg-muted p-6 mb-6">
+              <h3 className="text-sm font-bold uppercase tracking-wider font-sans mb-4">MARK ATTENDANCE</h3>
+              <div className="flex flex-wrap gap-3">
+                <select value={attStudentName} onChange={e => setAttStudentName(e.target.value)} className="px-4 py-3 rounded-2xl bg-background text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary flex-1 min-w-[200px]">
+                  <option value="">Select student...</option>
+                  {enrollments?.map(e => <option key={e.id} value={e.student_name}>{e.student_name}</option>)}
+                </select>
+                <div className="flex gap-2">
+                  {(["present", "absent", "late"] as const).map(s => (
+                    <button key={s} onClick={() => setAttStatus(s)} className={cn("px-4 py-2.5 rounded-full text-xs font-bold uppercase", attStatus === s ? "bg-foreground text-background" : "bg-foreground/10")}>
+                      {s}
+                    </button>
+                  ))}
+                </div>
+                <Button variant="filled" onClick={() => markAttendance.mutate()} disabled={!attStudentName}>SAVE</Button>
               </div>
-              <Button variant="filled" onClick={() => markAttendance.mutate()} disabled={!attStudentName}>SAVE</Button>
             </div>
-          </div>
+          )}
 
           <div className="space-y-2">
             {attendance?.map((a) => (
