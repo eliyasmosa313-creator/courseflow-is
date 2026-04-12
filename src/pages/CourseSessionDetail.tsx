@@ -254,7 +254,7 @@ const CourseSessionDetail = () => {
               const file = e.target.files?.[0];
               if (file) uploadFile.mutate(file);
             }} />
-            <Button variant="outline" onClick={() => setShowAddMaterial(true)}>
+            <Button variant="transparent" onClick={() => setShowAddMaterial(true)}>
               <Plus className="w-4 h-4 mr-2" /> ADD LINK/NOTE
             </Button>
           </div>
@@ -270,7 +270,7 @@ const CourseSessionDetail = () => {
                 <textarea value={matContent} onChange={e => setMatContent(e.target.value)} rows={3} className="w-full px-4 py-3 rounded-2xl bg-background text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none" placeholder={matType === "link" ? "https://..." : "Write your note..."} />
                 <div className="flex gap-3">
                   <Button variant="filled" onClick={() => addMaterial.mutate()}>ADD</Button>
-                  <Button variant="outline" onClick={() => setShowAddMaterial(false)}>CANCEL</Button>
+                  <Button variant="transparent" onClick={() => setShowAddMaterial(false)}>CANCEL</Button>
                 </div>
               </div>
             </div>
@@ -312,7 +312,7 @@ const CourseSessionDetail = () => {
               <input type="datetime-local" value={assignDue} onChange={e => setAssignDue(e.target.value)} className="w-full px-4 py-3 rounded-2xl bg-background text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
               <div className="flex gap-3">
                 <Button variant="filled" onClick={() => addAssignment.mutate()}>CREATE</Button>
-                <Button variant="outline" onClick={() => setShowAddAssignment(false)}>CANCEL</Button>
+                <Button variant="transparent" onClick={() => setShowAddAssignment(false)}>CANCEL</Button>
               </div>
             </div>
           )}

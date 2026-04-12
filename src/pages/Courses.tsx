@@ -125,7 +125,7 @@ const Courses = () => {
                   CREATE
                 </Button>
                 <Button
-                  variant="outline"
+                  variant="transparent"
                   onClick={() => setShowCreate(false)}
                   className="flex-1"
                 >

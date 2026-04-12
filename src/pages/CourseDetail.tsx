@@ -169,10 +169,10 @@ const CourseDetail = () => {
         <Button variant="filled" onClick={() => setShowCreateSession(true)}>
           <Plus className="w-4 h-4 mr-2" /> ADD SESSION
         </Button>
-        <Button variant="outline" onClick={() => setShowEnroll(true)}>
+        <Button variant="transparent" onClick={() => setShowEnroll(true)}>
           <UserPlus className="w-4 h-4 mr-2" /> ENROLL STUDENT
         </Button>
-        <Button variant="outline" onClick={() => setShowJoinCode(true)}>
+        <Button variant="transparent" onClick={() => setShowJoinCode(true)}>
           <Users className="w-4 h-4 mr-2" /> JOIN WITH CODE
         </Button>
       </div>
@@ -197,7 +197,7 @@ const CourseDetail = () => {
               </div>
               <div className="flex gap-3 pt-2">
                 <Button variant="filled" onClick={() => createSession.mutate()} className="flex-1">CREATE</Button>
-                <Button variant="outline" onClick={() => setShowCreateSession(false)} className="flex-1">CANCEL</Button>
+                <Button variant="transparent" onClick={() => setShowCreateSession(false)} className="flex-1">CANCEL</Button>
               </div>
             </div>
           </div>
@@ -216,7 +216,7 @@ const CourseDetail = () => {
               </div>
               <div className="flex gap-3 pt-2">
                 <Button variant="filled" onClick={() => enrollStudent.mutate()} className="flex-1">ENROLL</Button>
-                <Button variant="outline" onClick={() => setShowEnroll(false)} className="flex-1">CANCEL</Button>
+                <Button variant="transparent" onClick={() => setShowEnroll(false)} className="flex-1">CANCEL</Button>
               </div>
             </div>
           </div>
@@ -239,7 +239,7 @@ const CourseDetail = () => {
               </div>
               <div className="flex gap-3 pt-2">
                 <Button variant="filled" onClick={() => joinCourse.mutate()} className="flex-1">JOIN</Button>
-                <Button variant="outline" onClick={() => setShowJoinCode(false)} className="flex-1">CANCEL</Button>
+                <Button variant="transparent" onClick={() => setShowJoinCode(false)} className="flex-1">CANCEL</Button>
               </div>
             </div>
           </div>
