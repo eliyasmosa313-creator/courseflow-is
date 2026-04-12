@@ -1,8 +1,10 @@
-import { Bell, Moon, Sun } from "lucide-react";
+import { Bell, Moon, Sun, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import GlobalSearch from "./GlobalSearch";
+import { useAuth } from "@/hooks/useAuth";
 
 const DashboardHeader = () => {
+  const { signOut, user } = useAuth();
   const [dark, setDark] = useState(() =>
     document.documentElement.classList.contains("dark")
   );
@@ -29,11 +31,14 @@ const DashboardHeader = () => {
             <Bell className="w-5 h-5" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-accent-red rounded-full" />
           </button>
-          <img
-            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop"
-            alt="Profile"
-            className="w-9 h-9 rounded-full object-cover border-2 border-foreground/10"
-          />
+          <button
+            onClick={signOut}
+            className="p-2 rounded-full hover:bg-muted transition-colors"
+            aria-label="Sign out"
+            title="Sign out"
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
         </div>
       </div>
     </header>

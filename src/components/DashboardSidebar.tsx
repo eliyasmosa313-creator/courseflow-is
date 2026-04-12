@@ -12,25 +12,35 @@ import {
   BookOpen,
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
-const navItems = [
-  { label: "DASHBOARD", path: "/", icon: LayoutDashboard },
-  { label: "COURSES", path: "/courses", icon: BookOpen },
-  { label: "LIVE SESSIONS", path: "/sessions", icon: Video },
-  { label: "SCHEDULE", path: "/schedule", icon: Calendar },
-  { label: "ASSIGNMENTS", path: "/assignments", icon: ClipboardList },
-  { label: "STUDENTS", path: "/students", icon: Users },
-  { label: "SETTINGS", path: "/settings", icon: Settings },
+const allNavItems = [
+  { label: "DASHBOARD", path: "/", icon: LayoutDashboard, roles: ["viewer", "student", "instructor"] },
+  { label: "COURSES", path: "/courses", icon: BookOpen, roles: ["student", "instructor"] },
+  { label: "LIVE SESSIONS", path: "/sessions", icon: Video, roles: ["student", "instructor"] },
+  { label: "SCHEDULE", path: "/schedule", icon: Calendar, roles: ["student", "instructor"] },
+  { label: "ASSIGNMENTS", path: "/assignments", icon: ClipboardList, roles: ["student", "instructor"] },
+  { label: "STUDENTS", path: "/students", icon: Users, roles: ["instructor"] },
+  { label: "SETTINGS", path: "/settings", icon: Settings, roles: ["viewer", "student", "instructor"] },
 ];
 
 const DashboardSidebar = () => {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const { roles, isViewer, user } = useAuth();
+
+  const navItems = allNavItems.filter((item) => {
+    if (isViewer) return item.roles.includes("viewer");
+    return item.roles.some((r) => roles.includes(r as any));
+  });
 
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
     return location.pathname.startsWith(path);
   };
+
+  const displayName = user?.user_metadata?.display_name || user?.email || "User";
+  const roleLabel = roles.includes("instructor") ? "Instructor" : roles.includes("student") ? "Student" : "Viewer";
 
   return (
     <aside
@@ -80,15 +90,13 @@ const DashboardSidebar = () => {
       {/* Bottom profile */}
       <div className="px-3 py-4 border-t border-foreground/10">
         <div className="flex items-center gap-3 px-3">
-          <img
-            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop"
-            alt="Profile"
-            className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-          />
+          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0">
+            {displayName.charAt(0).toUpperCase()}
+          </div>
           {!collapsed && (
             <div className="min-w-0">
-              <p className="text-sm font-bold truncate">Dr. Elena Martinez</p>
-              <p className="text-xs text-foreground/50 truncate">Instructor</p>
+              <p className="text-sm font-bold truncate">{displayName}</p>
+              <p className="text-xs text-foreground/50 truncate">{roleLabel}</p>
             </div>
           )}
         </div>
