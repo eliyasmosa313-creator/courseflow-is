@@ -301,6 +301,50 @@ const CourseDetail = () => {
         </div>
       )}
 
+      {/* Modal: Edit Course */}
+      {showEditCourse && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-3xl p-8 w-full max-w-lg">
+            <h2 className="text-2xl font-extrabold uppercase tracking-tight font-sans mb-6">EDIT COURSE</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">Title</label>
+                <input value={editTitle} onChange={e => setEditTitle(e.target.value)} className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">Instructor</label>
+                <input value={editInstructor} onChange={e => setEditInstructor(e.target.value)} className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">Description</label>
+                <textarea value={editDescription} onChange={e => setEditDescription(e.target.value)} rows={3} className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="filled" onClick={() => updateCourse.mutate()} className="flex-1">SAVE</Button>
+                <Button variant="transparent" onClick={() => setShowEditCourse(false)} className="flex-1">CANCEL</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Delete Confirmation */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-3xl p-8 w-full max-w-md text-center">
+            <Trash2 className="w-12 h-12 mx-auto text-accent-red mb-4" />
+            <h2 className="text-2xl font-extrabold uppercase tracking-tight font-sans mb-2">DELETE COURSE?</h2>
+            <p className="text-foreground/60 font-serif text-sm mb-6">
+              This will permanently delete this course and all its sessions, materials, assignments, grades, and enrollments.
+            </p>
+            <div className="flex gap-3">
+              <Button variant="filled" onClick={() => deleteCourse.mutate()} className="flex-1 !bg-accent-red">DELETE</Button>
+              <Button variant="transparent" onClick={() => setShowDeleteConfirm(false)} className="flex-1">CANCEL</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Sessions List */}
       <h2 className="text-2xl font-extrabold uppercase tracking-tight font-sans mb-4">SESSIONS</h2>
       {sessions?.length === 0 ? (
