@@ -9,11 +9,13 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  BookOpen,
 } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
   { label: "DASHBOARD", path: "/", icon: LayoutDashboard },
+  { label: "COURSES", path: "/courses", icon: BookOpen },
   { label: "LIVE SESSIONS", path: "/sessions", icon: Video },
   { label: "SCHEDULE", path: "/schedule", icon: Calendar },
   { label: "ASSIGNMENTS", path: "/assignments", icon: ClipboardList },

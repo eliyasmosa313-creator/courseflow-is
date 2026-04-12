@@ -7,6 +7,9 @@ import DashboardLayout from "@/components/DashboardLayout";
 import Dashboard from "@/pages/Dashboard";
 import LiveSessions from "@/pages/LiveSessions";
 import SessionDetail from "@/pages/SessionDetail";
+import Courses from "@/pages/Courses";
+import CourseDetail from "@/pages/CourseDetail";
+import CourseSessionDetail from "@/pages/CourseSessionDetail";
 import Schedule from "@/pages/Schedule";
 import Assignments from "@/pages/Assignments";
 import Students from "@/pages/Students";
@@ -30,6 +33,9 @@ const router = createBrowserRouter([
         element: <DashboardLayout />,
         children: [
           { path: "/", element: <Dashboard /> },
+          { path: "/courses", element: <Courses /> },
+          { path: "/courses/:id", element: <CourseDetail /> },
+          { path: "/courses/:courseId/sessions/:sessionId", element: <CourseSessionDetail /> },
           { path: "/sessions", element: <LiveSessions /> },
           { path: "/sessions/:id", element: <SessionDetail /> },
           { path: "/schedule", element: <Schedule /> },
