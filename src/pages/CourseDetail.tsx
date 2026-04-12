@@ -7,6 +7,7 @@ import Button from "@/components/Button";
 
 const CourseDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [copiedCode, setCopiedCode] = useState(false);
   const [showCreateSession, setShowCreateSession] = useState(false);
