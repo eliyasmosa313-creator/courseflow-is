@@ -224,6 +224,12 @@ const CourseDetail = () => {
         <Button variant="transparent" onClick={() => setShowJoinCode(true)}>
           <Users className="w-4 h-4 mr-2" /> JOIN WITH CODE
         </Button>
+        <Button variant="transparent" onClick={openEditCourse}>
+          <Pencil className="w-4 h-4 mr-2" /> EDIT COURSE
+        </Button>
+        <Button variant="transparent" onClick={() => setShowDeleteConfirm(true)}>
+          <Trash2 className="w-4 h-4 mr-2 text-accent-red" /> DELETE
+        </Button>
       </div>
 
       {/* Modal: Create Session */}
