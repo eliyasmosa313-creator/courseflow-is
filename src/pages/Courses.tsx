@@ -186,6 +186,97 @@ const Courses = () => {
         </div>
       )}
 
+      {/* Edit Course Modal */}
+      {editingCourse && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-3xl p-8 w-full max-w-lg">
+            <h2 className="text-2xl font-extrabold uppercase tracking-tight font-sans mb-6">
+              EDIT COURSE
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">
+                  Course Title
+                </label>
+                <input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">
+                  Instructor Name
+                </label>
+                <input
+                  value={instructorName}
+                  onChange={(e) => setInstructorName(e.target.value)}
+                  className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">
+                  Description
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button
+                  variant="filled"
+                  onClick={() => updateMutation.mutate()}
+                  className="flex-1"
+                >
+                  SAVE CHANGES
+                </Button>
+                <Button
+                  variant="transparent"
+                  onClick={() => setEditingCourse(null)}
+                  className="flex-1"
+                >
+                  CANCEL
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingCourseId && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-3xl p-8 w-full max-w-md text-center">
+            <Trash2 className="w-12 h-12 mx-auto text-accent-red mb-4" />
+            <h2 className="text-2xl font-extrabold uppercase tracking-tight font-sans mb-2">
+              DELETE COURSE?
+            </h2>
+            <p className="text-foreground/60 font-serif text-sm mb-6">
+              This will permanently delete the course and all its sessions, materials, assignments, grades, and enrollments.
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="filled"
+                onClick={() => deleteMutation.mutate(deletingCourseId)}
+                className="flex-1 !bg-accent-red"
+              >
+                DELETE
+              </Button>
+              <Button
+                variant="transparent"
+                onClick={() => setDeletingCourseId(null)}
+                className="flex-1"
+              >
+                CANCEL
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Course Grid */}
       {isLoading ? (
         <p className="text-foreground/50 font-sans">Loading courses...</p>
