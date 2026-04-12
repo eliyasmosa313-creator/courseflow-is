@@ -4,11 +4,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Plus, Clock, Copy, Check, Users, UserPlus, Pencil, Trash2, Lock, Globe } from "lucide-react";
 import Button from "@/components/Button";
+import { useAuth } from "@/hooks/useAuth";
 
 const CourseDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { isInstructor } = useAuth();
   const [copiedCode, setCopiedCode] = useState(false);
   const [showCreateSession, setShowCreateSession] = useState(false);
   const [showEnroll, setShowEnroll] = useState(false);
@@ -232,23 +234,25 @@ const CourseDetail = () => {
       </div>
 
       {/* Actions */}
-      <div className="flex flex-wrap gap-3 mb-8">
-        <Button variant="filled" onClick={() => setShowCreateSession(true)}>
-          <Plus className="w-4 h-4 mr-2" /> ADD SESSION
-        </Button>
-        <Button variant="transparent" onClick={() => setShowEnroll(true)}>
-          <UserPlus className="w-4 h-4 mr-2" /> ENROLL STUDENT
-        </Button>
-        <Button variant="transparent" onClick={() => setShowJoinCode(true)}>
-          <Users className="w-4 h-4 mr-2" /> JOIN WITH CODE
-        </Button>
-        <Button variant="transparent" onClick={openEditCourse}>
-          <Pencil className="w-4 h-4 mr-2" /> EDIT COURSE
-        </Button>
-        <Button variant="transparent" onClick={() => setShowDeleteConfirm(true)}>
-          <Trash2 className="w-4 h-4 mr-2 text-accent-red" /> DELETE
-        </Button>
-      </div>
+      {isInstructor && (
+        <div className="flex flex-wrap gap-3 mb-8">
+          <Button variant="filled" onClick={() => setShowCreateSession(true)}>
+            <Plus className="w-4 h-4 mr-2" /> ADD SESSION
+          </Button>
+          <Button variant="transparent" onClick={() => setShowEnroll(true)}>
+            <UserPlus className="w-4 h-4 mr-2" /> ENROLL STUDENT
+          </Button>
+          <Button variant="transparent" onClick={() => setShowJoinCode(true)}>
+            <Users className="w-4 h-4 mr-2" /> JOIN WITH CODE
+          </Button>
+          <Button variant="transparent" onClick={openEditCourse}>
+            <Pencil className="w-4 h-4 mr-2" /> EDIT COURSE
+          </Button>
+          <Button variant="transparent" onClick={() => setShowDeleteConfirm(true)}>
+            <Trash2 className="w-4 h-4 mr-2 text-accent-red" /> DELETE
+          </Button>
+        </div>
+      )}
 
       {/* Modal: Create Session */}
       {showCreateSession && (

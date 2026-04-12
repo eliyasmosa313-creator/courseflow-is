@@ -4,8 +4,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, BookOpen, Users, Copy, Check, Pencil, Trash2 } from "lucide-react";
 import Button from "@/components/Button";
+import { useAuth } from "@/hooks/useAuth";
 
 const Courses = () => {
+  const { isInstructor, isStudent, user } = useAuth();
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
   const [editingCourse, setEditingCourse] = useState<any>(null);
@@ -16,14 +18,34 @@ const Courses = () => {
   const [deletingCourseId, setDeletingCourseId] = useState<string | null>(null);
 
   const { data: courses, isLoading } = useQuery({
-    queryKey: ["courses"],
+    queryKey: ["courses", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("courses")
-        .select("*, course_enrollments(count), sessions(count)")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
+      if (isInstructor) {
+        // Instructors see their own courses
+        const { data, error } = await supabase
+          .from("courses")
+          .select("*, course_enrollments(count), sessions(count)")
+          .eq("user_id", user!.id)
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        return data;
+      } else {
+        // Students see courses they are enrolled in
+        const { data: enrollments, error: eErr } = await supabase
+          .from("course_enrollments")
+          .select("course_id")
+          .eq("user_id", user!.id);
+        if (eErr) throw eErr;
+        const courseIds = enrollments?.map(e => e.course_id) || [];
+        if (courseIds.length === 0) return [];
+        const { data, error } = await supabase
+          .from("courses")
+          .select("*, course_enrollments(count), sessions(count)")
+          .in("id", courseIds)
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        return data;
+      }
     },
   });
 
@@ -33,6 +55,7 @@ const Courses = () => {
         title,
         description,
         instructor_name: instructorName,
+        user_id: user!.id,
       });
       if (error) throw error;
     },
@@ -118,9 +141,11 @@ const Courses = () => {
             Manage your courses and learning tracks
           </p>
         </div>
-        <Button variant="filled" onClick={() => setShowCreate(true)}>
-          <Plus className="w-4 h-4 mr-2" /> NEW COURSE
-        </Button>
+        {isInstructor && (
+          <Button variant="filled" onClick={() => setShowCreate(true)}>
+            <Plus className="w-4 h-4 mr-2" /> NEW COURSE
+          </Button>
+        )}
       </div>
 
       {/* Create Course Modal */}
@@ -334,25 +359,27 @@ const Courses = () => {
                         {(course.sessions as any)?.[0]?.count ?? 0} sessions
                       </span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={(e) => openEdit(course, e)}
-                        className="p-2 rounded-full hover:bg-foreground/10 transition-colors"
-                        title="Edit course"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setDeletingCourseId(course.id);
-                        }}
-                        className="p-2 rounded-full hover:bg-accent-red/20 transition-colors text-accent-red"
-                        title="Delete course"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                    {isInstructor && (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={(e) => openEdit(course, e)}
+                          className="p-2 rounded-full hover:bg-foreground/10 transition-colors"
+                          title="Edit course"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setDeletingCourseId(course.id);
+                          }}
+                          className="p-2 rounded-full hover:bg-accent-red/20 transition-colors text-accent-red"
+                          title="Delete course"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </article>
