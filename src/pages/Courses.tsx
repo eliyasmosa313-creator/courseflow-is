@@ -323,15 +323,36 @@ const Courses = () => {
                     </p>
                   )}
 
-                  <div className="mt-auto flex items-center gap-4 text-sm text-foreground/60 font-sans">
-                    <span className="flex items-center gap-1">
-                      <Users className="w-3.5 h-3.5" />
-                      {(course.course_enrollments as any)?.[0]?.count ?? 0} students
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <BookOpen className="w-3.5 h-3.5" />
-                      {(course.sessions as any)?.[0]?.count ?? 0} sessions
-                    </span>
+                  <div className="mt-auto flex items-center justify-between">
+                    <div className="flex items-center gap-4 text-sm text-foreground/60 font-sans">
+                      <span className="flex items-center gap-1">
+                        <Users className="w-3.5 h-3.5" />
+                        {(course.course_enrollments as any)?.[0]?.count ?? 0} students
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <BookOpen className="w-3.5 h-3.5" />
+                        {(course.sessions as any)?.[0]?.count ?? 0} sessions
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={(e) => openEdit(course, e)}
+                        className="p-2 rounded-full hover:bg-foreground/10 transition-colors"
+                        title="Edit course"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setDeletingCourseId(course.id);
+                        }}
+                        className="p-2 rounded-full hover:bg-accent-red/20 transition-colors text-accent-red"
+                        title="Delete course"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </article>
