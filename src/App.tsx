@@ -33,6 +33,9 @@ const router = createBrowserRouter([
         element: <DashboardLayout />,
         children: [
           { path: "/", element: <Dashboard /> },
+          { path: "/courses", element: <Courses /> },
+          { path: "/courses/:id", element: <CourseDetail /> },
+          { path: "/courses/:courseId/sessions/:sessionId", element: <CourseSessionDetail /> },
           { path: "/sessions", element: <LiveSessions /> },
           { path: "/sessions/:id", element: <SessionDetail /> },
           { path: "/schedule", element: <Schedule /> },
