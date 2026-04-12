@@ -55,6 +55,7 @@ const Courses = () => {
         title,
         description,
         instructor_name: instructorName,
+        user_id: user!.id,
       });
       if (error) throw error;
     },
