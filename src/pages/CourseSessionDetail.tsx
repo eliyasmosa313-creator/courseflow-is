@@ -21,6 +21,7 @@ const CourseSessionDetail = () => {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("materials");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { isInstructor } = useAuth();
 
   // Material form
   const [showAddMaterial, setShowAddMaterial] = useState(false);
