@@ -8,10 +8,12 @@ import Button from "@/components/Button";
 const Courses = () => {
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<any>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [instructorName, setInstructorName] = useState("");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [deletingCourseId, setDeletingCourseId] = useState<string | null>(null);
 
   const { data: courses, isLoading } = useQuery({
     queryKey: ["courses"],
