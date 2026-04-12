@@ -125,6 +125,49 @@ const CourseDetail = () => {
     },
   });
 
+  const updateCourse = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("courses")
+        .update({ title: editTitle, description: editDescription, instructor_name: editInstructor })
+        .eq("id", id!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["course", id] });
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      setShowEditCourse(false);
+    },
+  });
+
+  const deleteCourse = useMutation({
+    mutationFn: async () => {
+      const { data: sessions } = await supabase.from("sessions").select("id").eq("course_id", id!);
+      if (sessions?.length) {
+        const sessionIds = sessions.map(s => s.id);
+        await supabase.from("session_materials").delete().in("session_id", sessionIds);
+        await supabase.from("session_assignments").delete().in("session_id", sessionIds);
+        await supabase.from("session_attendance").delete().in("session_id", sessionIds);
+        await supabase.from("session_grades").delete().in("session_id", sessionIds);
+      }
+      await supabase.from("sessions").delete().eq("course_id", id!);
+      await supabase.from("course_enrollments").delete().eq("course_id", id!);
+      const { error } = await supabase.from("courses").delete().eq("id", id!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      navigate("/courses");
+    },
+  });
+
+  const openEditCourse = () => {
+    setEditTitle(course?.title || "");
+    setEditDescription(course?.description || "");
+    setEditInstructor(course?.instructor_name || "");
+    setShowEditCourse(true);
+  };
+
   const statusColors: Record<string, string> = {
     draft: "bg-foreground/10",
     scheduled: "bg-vibrant-blue",
