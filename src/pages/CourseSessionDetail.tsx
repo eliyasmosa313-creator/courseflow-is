@@ -305,9 +305,11 @@ const CourseSessionDetail = () => {
       {/* Assignments Tab */}
       {tab === "assignments" && (
         <div>
-          <Button variant="filled" onClick={() => setShowAddAssignment(true)} className="mb-6">
-            <Plus className="w-4 h-4 mr-2" /> ADD ASSIGNMENT
-          </Button>
+          {isInstructor && (
+            <Button variant="filled" onClick={() => setShowAddAssignment(true)} className="mb-6">
+              <Plus className="w-4 h-4 mr-2" /> ADD ASSIGNMENT
+            </Button>
+          )}
 
           {showAddAssignment && (
             <div className="rounded-3xl bg-muted p-6 mb-6 space-y-4">
