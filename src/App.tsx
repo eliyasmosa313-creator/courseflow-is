@@ -21,24 +21,26 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const Layout = () => (
-  <>
+const RootLayout = () => (
+  <AuthProvider>
     <ScrollRestoration />
     <Outlet />
-  </>
+  </AuthProvider>
+);
+
+const ProtectedDashboard = () => (
+  <ProtectedRoute>
+    <DashboardLayout />
+  </ProtectedRoute>
 );
 
 const router = createBrowserRouter([
   {
-    element: <Layout />,
+    element: <RootLayout />,
     children: [
       { path: "/auth", element: <Auth /> },
       {
-        element: (
-          <ProtectedRoute>
-            <DashboardLayout />
-          </ProtectedRoute>
-        ),
+        element: <ProtectedDashboard />,
         children: [
           { path: "/", element: <Dashboard /> },
           {
@@ -116,11 +118,9 @@ const router = createBrowserRouter([
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <RouterProvider router={router} />
-      </AuthProvider>
+      <Toaster />
+      <Sonner />
+      <RouterProvider router={router} />
     </TooltipProvider>
   </QueryClientProvider>
 );
