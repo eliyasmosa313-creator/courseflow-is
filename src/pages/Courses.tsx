@@ -45,6 +45,53 @@ const Courses = () => {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("courses")
+        .update({ title, description, instructor_name: instructorName })
+        .eq("id", editingCourse.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      setEditingCourse(null);
+      setTitle("");
+      setDescription("");
+      setInstructorName("");
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (courseId: string) => {
+      // Delete related data first
+      const { data: sessions } = await supabase.from("sessions").select("id").eq("course_id", courseId);
+      if (sessions?.length) {
+        const sessionIds = sessions.map(s => s.id);
+        await supabase.from("session_materials").delete().in("session_id", sessionIds);
+        await supabase.from("session_assignments").delete().in("session_id", sessionIds);
+        await supabase.from("session_attendance").delete().in("session_id", sessionIds);
+        await supabase.from("session_grades").delete().in("session_id", sessionIds);
+      }
+      await supabase.from("sessions").delete().eq("course_id", courseId);
+      await supabase.from("course_enrollments").delete().eq("course_id", courseId);
+      const { error } = await supabase.from("courses").delete().eq("id", courseId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      setDeletingCourseId(null);
+    },
+  });
+
+  const openEdit = (course: any, e: React.MouseEvent) => {
+    e.preventDefault();
+    setEditingCourse(course);
+    setTitle(course.title);
+    setDescription(course.description || "");
+    setInstructorName(course.instructor_name);
+  };
+
   const copyJoinCode = (code: string) => {
     navigator.clipboard.writeText(code);
     setCopiedCode(code);
