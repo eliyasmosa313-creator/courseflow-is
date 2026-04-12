@@ -13,6 +13,11 @@ const CourseDetail = () => {
   const [showCreateSession, setShowCreateSession] = useState(false);
   const [showEnroll, setShowEnroll] = useState(false);
   const [showJoinCode, setShowJoinCode] = useState(false);
+  const [showEditCourse, setShowEditCourse] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editInstructor, setEditInstructor] = useState("");
 
   // Session form
   const [sessionTitle, setSessionTitle] = useState("");
