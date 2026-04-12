@@ -10,6 +10,7 @@ const CourseDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { isInstructor } = useAuth();
   const [copiedCode, setCopiedCode] = useState(false);
   const [showCreateSession, setShowCreateSession] = useState(false);
   const [showEnroll, setShowEnroll] = useState(false);
