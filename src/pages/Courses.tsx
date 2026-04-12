@@ -18,14 +18,34 @@ const Courses = () => {
   const [deletingCourseId, setDeletingCourseId] = useState<string | null>(null);
 
   const { data: courses, isLoading } = useQuery({
-    queryKey: ["courses"],
+    queryKey: ["courses", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("courses")
-        .select("*, course_enrollments(count), sessions(count)")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
+      if (isInstructor) {
+        // Instructors see their own courses
+        const { data, error } = await supabase
+          .from("courses")
+          .select("*, course_enrollments(count), sessions(count)")
+          .eq("user_id", user!.id)
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        return data;
+      } else {
+        // Students see courses they are enrolled in
+        const { data: enrollments, error: eErr } = await supabase
+          .from("course_enrollments")
+          .select("course_id")
+          .eq("user_id", user!.id);
+        if (eErr) throw eErr;
+        const courseIds = enrollments?.map(e => e.course_id) || [];
+        if (courseIds.length === 0) return [];
+        const { data, error } = await supabase
+          .from("courses")
+          .select("*, course_enrollments(count), sessions(count)")
+          .in("id", courseIds)
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        return data;
+      }
     },
   });
 
