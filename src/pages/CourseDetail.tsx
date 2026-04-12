@@ -253,12 +253,16 @@ const CourseDetail = () => {
       {/* Modal: Create Session */}
       {showCreateSession && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-3xl p-8 w-full max-w-lg">
+          <div className="bg-background rounded-3xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-extrabold uppercase tracking-tight font-sans mb-6">NEW SESSION</h2>
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">Title</label>
                 <input value={sessionTitle} onChange={e => setSessionTitle(e.target.value)} className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Session title" />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">Description</label>
+                <textarea value={sessionDescription} onChange={e => setSessionDescription(e.target.value)} rows={3} className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none" placeholder="What will this session cover?" />
               </div>
               <div>
                 <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">Scheduled At</label>
@@ -268,9 +272,61 @@ const CourseDetail = () => {
                 <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">Duration (minutes)</label>
                 <input type="number" value={duration} onChange={e => setDuration(e.target.value)} className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
               </div>
+
+              {/* Access Control */}
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-2 block">Student Access</label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setAccessType("all"); setSelectedStudents([]); }}
+                    className={`flex-1 px-4 py-3 rounded-2xl text-sm font-bold uppercase tracking-wider transition-colors ${accessType === "all" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground/60 hover:bg-foreground/10"}`}
+                  >
+                    All Enrolled
+                  </button>
+                  <button
+                    onClick={() => setAccessType("selected")}
+                    className={`flex-1 px-4 py-3 rounded-2xl text-sm font-bold uppercase tracking-wider transition-colors ${accessType === "selected" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground/60 hover:bg-foreground/10"}`}
+                  >
+                    Selected Only
+                  </button>
+                </div>
+              </div>
+
+              {/* Student Selection */}
+              {accessType === "selected" && (
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-2 block">
+                    Select Students ({selectedStudents.length} selected)
+                  </label>
+                  {enrollments?.length === 0 ? (
+                    <p className="text-foreground/40 text-sm font-sans">No enrolled students yet.</p>
+                  ) : (
+                    <div className="space-y-2 max-h-40 overflow-y-auto rounded-2xl bg-muted p-3">
+                      {enrollments?.map((e) => (
+                        <label key={e.id} className="flex items-center gap-3 cursor-pointer py-1.5 px-2 rounded-xl hover:bg-foreground/5 transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={selectedStudents.includes(e.student_name)}
+                            onChange={(ev) => {
+                              if (ev.target.checked) {
+                                setSelectedStudents(prev => [...prev, e.student_name]);
+                              } else {
+                                setSelectedStudents(prev => prev.filter(n => n !== e.student_name));
+                              }
+                            }}
+                            className="w-4 h-4 rounded accent-primary"
+                          />
+                          <span className="text-sm font-sans font-medium">{e.student_name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="flex gap-3 pt-2">
                 <Button variant="filled" onClick={() => createSession.mutate()} className="flex-1">CREATE</Button>
-                <Button variant="transparent" onClick={() => setShowCreateSession(false)} className="flex-1">CANCEL</Button>
+                <Button variant="transparent" onClick={() => { setShowCreateSession(false); setAccessType("all"); setSelectedStudents([]); }} className="flex-1">CANCEL</Button>
               </div>
             </div>
           </div>
