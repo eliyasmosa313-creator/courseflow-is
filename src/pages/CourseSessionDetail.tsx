@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Upload, Plus, FileText, Image, Link as LinkIcon, StickyNote, Download } from "lucide-react";
 import Button from "@/components/Button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
 type Tab = "materials" | "assignments" | "attendance" | "grades";
 
