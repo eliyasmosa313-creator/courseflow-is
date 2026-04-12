@@ -1,0 +1,300 @@
+import { useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { ArrowLeft, Plus, Clock, Copy, Check, Users, UserPlus } from "lucide-react";
+import Button from "@/components/Button";
+
+const CourseDetail = () => {
+  const { id } = useParams();
+  const queryClient = useQueryClient();
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [showCreateSession, setShowCreateSession] = useState(false);
+  const [showEnroll, setShowEnroll] = useState(false);
+  const [showJoinCode, setShowJoinCode] = useState(false);
+
+  // Session form
+  const [sessionTitle, setSessionTitle] = useState("");
+  const [scheduledAt, setScheduledAt] = useState("");
+  const [duration, setDuration] = useState("60");
+
+  // Enroll form
+  const [studentName, setStudentName] = useState("");
+  const [joinCode, setJoinCode] = useState("");
+
+  const { data: course } = useQuery({
+    queryKey: ["course", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("courses")
+        .select("*")
+        .eq("id", id!)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: sessions } = useQuery({
+    queryKey: ["course-sessions", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("sessions")
+        .select("*")
+        .eq("course_id", id!)
+        .order("scheduled_at", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: enrollments } = useQuery({
+    queryKey: ["course-enrollments", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("course_enrollments")
+        .select("*")
+        .eq("course_id", id!)
+        .order("enrolled_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const createSession = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("sessions").insert({
+        course_id: id!,
+        title: sessionTitle,
+        scheduled_at: new Date(scheduledAt).toISOString(),
+        duration_minutes: parseInt(duration),
+        status: "scheduled",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["course-sessions", id] });
+      setShowCreateSession(false);
+      setSessionTitle("");
+      setScheduledAt("");
+      setDuration("60");
+    },
+  });
+
+  const enrollStudent = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("course_enrollments").insert({
+        course_id: id!,
+        student_name: studentName,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["course-enrollments", id] });
+      setStudentName("");
+      setShowEnroll(false);
+    },
+  });
+
+  const joinCourse = useMutation({
+    mutationFn: async () => {
+      // Find course by join code
+      const { data: foundCourse, error: findError } = await supabase
+        .from("courses")
+        .select("id")
+        .eq("join_code", joinCode)
+        .single();
+      if (findError) throw new Error("Invalid join code");
+      const { error } = await supabase.from("course_enrollments").insert({
+        course_id: foundCourse.id,
+        student_name: studentName,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["course-enrollments", id] });
+      setJoinCode("");
+      setStudentName("");
+      setShowJoinCode(false);
+    },
+  });
+
+  const statusColors: Record<string, string> = {
+    draft: "bg-foreground/10",
+    scheduled: "bg-vibrant-blue",
+    live: "bg-vibrant-coral",
+    completed: "bg-vibrant-mint",
+  };
+
+  if (!course) return null;
+
+  return (
+    <div>
+      <Link to="/courses" className="inline-flex items-center gap-2 text-foreground/60 hover:text-foreground transition-colors mb-6 nav-text">
+        <ArrowLeft className="w-4 h-4" /> BACK TO COURSES
+      </Link>
+
+      {/* Course Hero */}
+      <div className="rounded-3xl bg-vibrant-purple p-8 md:p-12 mb-8">
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <span className="text-xs font-bold uppercase tracking-wider text-foreground/60">
+            {course.instructor_name}
+          </span>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(course.join_code);
+              setCopiedCode(true);
+              setTimeout(() => setCopiedCode(false), 2000);
+            }}
+            className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider bg-foreground/10 px-3 py-1 rounded-full hover:bg-foreground/20 transition-colors"
+          >
+            {copiedCode ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+            JOIN CODE: {course.join_code}
+          </button>
+        </div>
+
+        <h1 className="text-5xl md:text-7xl font-extrabold uppercase tracking-tighter leading-[0.8] font-sans mb-4">
+          {course.title}
+        </h1>
+
+        {course.description && (
+          <p className="text-base md:text-lg text-foreground/80 font-serif max-w-2xl">
+            {course.description}
+          </p>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className="flex flex-wrap gap-3 mb-8">
+        <Button variant="filled" onClick={() => setShowCreateSession(true)}>
+          <Plus className="w-4 h-4 mr-2" /> ADD SESSION
+        </Button>
+        <Button variant="outline" onClick={() => setShowEnroll(true)}>
+          <UserPlus className="w-4 h-4 mr-2" /> ENROLL STUDENT
+        </Button>
+        <Button variant="outline" onClick={() => setShowJoinCode(true)}>
+          <Users className="w-4 h-4 mr-2" /> JOIN WITH CODE
+        </Button>
+      </div>
+
+      {/* Modal: Create Session */}
+      {showCreateSession && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-3xl p-8 w-full max-w-lg">
+            <h2 className="text-2xl font-extrabold uppercase tracking-tight font-sans mb-6">NEW SESSION</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">Title</label>
+                <input value={sessionTitle} onChange={e => setSessionTitle(e.target.value)} className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Session title" />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">Scheduled At</label>
+                <input type="datetime-local" value={scheduledAt} onChange={e => setScheduledAt(e.target.value)} className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">Duration (minutes)</label>
+                <input type="number" value={duration} onChange={e => setDuration(e.target.value)} className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="filled" onClick={() => createSession.mutate()} className="flex-1">CREATE</Button>
+                <Button variant="outline" onClick={() => setShowCreateSession(false)} className="flex-1">CANCEL</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Enroll Student */}
+      {showEnroll && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-3xl p-8 w-full max-w-lg">
+            <h2 className="text-2xl font-extrabold uppercase tracking-tight font-sans mb-6">ENROLL STUDENT</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">Student Name</label>
+                <input value={studentName} onChange={e => setStudentName(e.target.value)} className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Alex Rivera" />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="filled" onClick={() => enrollStudent.mutate()} className="flex-1">ENROLL</Button>
+                <Button variant="outline" onClick={() => setShowEnroll(false)} className="flex-1">CANCEL</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Join with Code */}
+      {showJoinCode && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-3xl p-8 w-full max-w-lg">
+            <h2 className="text-2xl font-extrabold uppercase tracking-tight font-sans mb-6">JOIN WITH CODE</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">Student Name</label>
+                <input value={studentName} onChange={e => setStudentName(e.target.value)} className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Your name" />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">Join Code</label>
+                <input value={joinCode} onChange={e => setJoinCode(e.target.value)} className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary tracking-widest text-center text-lg" placeholder="abc123" maxLength={6} />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="filled" onClick={() => joinCourse.mutate()} className="flex-1">JOIN</Button>
+                <Button variant="outline" onClick={() => setShowJoinCode(false)} className="flex-1">CANCEL</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sessions List */}
+      <h2 className="text-2xl font-extrabold uppercase tracking-tight font-sans mb-4">SESSIONS</h2>
+      {sessions?.length === 0 ? (
+        <p className="text-foreground/50 font-sans text-sm">No sessions yet. Add your first session!</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
+          {sessions?.map((session) => (
+            <Link key={session.id} to={`/courses/${id}/sessions/${session.id}`} className="block">
+              <article className={`card-hover rounded-3xl p-6 ${statusColors[session.status] || "bg-muted"}`}>
+                <div className="flex items-center justify-between mb-3">
+                  <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border-2 border-foreground/20 ${session.status === "live" ? "bg-accent-red text-foreground" : "bg-foreground/10"}`}>
+                    {session.status === "live" ? "● LIVE" : session.status.toUpperCase()}
+                  </span>
+                </div>
+                <h3 className="text-xl font-extrabold uppercase tracking-tighter font-sans leading-[0.85] mb-3">
+                  {session.title}
+                </h3>
+                <div className="flex items-center gap-3 text-sm text-foreground/60 font-sans">
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5" />
+                    {new Date(session.scheduled_at).toLocaleDateString()} · {session.duration_minutes}min
+                  </span>
+                </div>
+              </article>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* Enrolled Students */}
+      <h2 className="text-2xl font-extrabold uppercase tracking-tight font-sans mb-4">
+        ENROLLED STUDENTS ({enrollments?.length ?? 0})
+      </h2>
+      {enrollments?.length === 0 ? (
+        <p className="text-foreground/50 font-sans text-sm">No students enrolled yet.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {enrollments?.map((e) => (
+            <div key={e.id} className="rounded-3xl bg-vibrant-lavender p-5 card-hover">
+              <p className="font-bold text-sm font-sans">{e.student_name}</p>
+              <p className="text-xs text-foreground/50 mt-1">
+                Enrolled {new Date(e.enrolled_at).toLocaleDateString()}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CourseDetail;
