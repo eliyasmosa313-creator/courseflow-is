@@ -141,9 +141,11 @@ const Courses = () => {
             Manage your courses and learning tracks
           </p>
         </div>
-        <Button variant="filled" onClick={() => setShowCreate(true)}>
-          <Plus className="w-4 h-4 mr-2" /> NEW COURSE
-        </Button>
+        {isInstructor && (
+          <Button variant="filled" onClick={() => setShowCreate(true)}>
+            <Plus className="w-4 h-4 mr-2" /> NEW COURSE
+          </Button>
+        )}
       </div>
 
       {/* Create Course Modal */}
