@@ -49,24 +49,6 @@ const Courses = () => {
     },
   });
 
-  const createMutation = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from("courses").insert({
-        title,
-        description,
-        instructor_name: instructorName,
-        user_id: user!.id,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["courses"] });
-      setShowCreate(false);
-      setTitle("");
-      setDescription("");
-      setInstructorName("");
-    },
-  });
 
   const updateMutation = useMutation({
     mutationFn: async () => {
