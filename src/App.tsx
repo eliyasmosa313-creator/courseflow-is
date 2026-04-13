@@ -10,6 +10,7 @@ import Dashboard from "@/pages/Dashboard";
 import LiveSessions from "@/pages/LiveSessions";
 import SessionDetail from "@/pages/SessionDetail";
 import Courses from "@/pages/Courses";
+import CreateCourse from "@/pages/CreateCourse";
 import CourseDetail from "@/pages/CourseDetail";
 import CourseSessionDetail from "@/pages/CourseSessionDetail";
 import Schedule from "@/pages/Schedule";
@@ -48,6 +49,14 @@ const router = createBrowserRouter([
             element: (
               <ProtectedRoute allowedRoles={["instructor", "student"]}>
                 <Courses />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "/courses/new",
+            element: (
+              <ProtectedRoute allowedRoles={["instructor"]}>
+                <CreateCourse />
               </ProtectedRoute>
             ),
           },

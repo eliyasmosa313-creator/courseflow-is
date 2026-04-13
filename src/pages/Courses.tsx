@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, BookOpen, Users, Copy, Check, Pencil, Trash2 } from "lucide-react";
@@ -8,8 +8,8 @@ import { useAuth } from "@/hooks/useAuth";
 
 const Courses = () => {
   const { isInstructor, isStudent, user } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [showCreate, setShowCreate] = useState(false);
   const [editingCourse, setEditingCourse] = useState<any>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -142,74 +142,11 @@ const Courses = () => {
           </p>
         </div>
         {isInstructor && (
-          <Button variant="filled" onClick={() => setShowCreate(true)}>
+          <Button variant="filled" onClick={() => navigate("/courses/new")}>
             <Plus className="w-4 h-4 mr-2" /> NEW COURSE
           </Button>
         )}
       </div>
-
-      {/* Create Course Modal */}
-      {showCreate && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-3xl p-8 w-full max-w-lg">
-            <h2 className="text-2xl font-extrabold uppercase tracking-tight font-sans mb-6">
-              CREATE COURSE
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">
-                  Course Title
-                </label>
-                <input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="e.g. Advanced React Patterns"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">
-                  Instructor Name
-                </label>
-                <input
-                  value={instructorName}
-                  onChange={(e) => setInstructorName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="e.g. Dr. Elena Martinez"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">
-                  Description
-                </label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
-                  className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                  placeholder="What will students learn?"
-                />
-              </div>
-              <div className="flex gap-3 pt-2">
-                <Button
-                  variant="filled"
-                  onClick={() => createMutation.mutate()}
-                  className="flex-1"
-                >
-                  CREATE
-                </Button>
-                <Button
-                  variant="transparent"
-                  onClick={() => setShowCreate(false)}
-                  className="flex-1"
-                >
-                  CANCEL
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Edit Course Modal */}
       {editingCourse && (
