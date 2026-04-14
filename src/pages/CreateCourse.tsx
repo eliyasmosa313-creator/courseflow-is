@@ -247,18 +247,6 @@ const CreateCourse = () => {
           </div>
         </div>
 
-        {/* Instructor name (auto) */}
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-          <span className="text-xs font-bold uppercase tracking-wider text-foreground/60">
-            {instructorName}
-          </span>
-          {courseType !== "free" && (
-            <span className="text-xs font-bold uppercase tracking-wider bg-foreground/10 px-2 py-0.5 rounded-full">
-              {courseType === "paid" ? `$${price || "0"}` : "Private"}
-            </span>
-          )}
-        </div>
-
         {/* Inline editable title */}
         {editingTitle ? (
           <input
