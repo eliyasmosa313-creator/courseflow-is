@@ -234,7 +234,7 @@ const Courses = () => {
           {courses?.map((course, i) => (
             <Link key={course.id} to={`/courses/${course.id}`} className="block">
               <article
-                className={`card-hover rounded-3xl overflow-hidden flex flex-col h-full ${colors[i % colors.length]}`}
+                className={`card-hover rounded-3xl overflow-hidden flex flex-col h-full ${(course as any).color || colors[i % colors.length]}`}
               >
                 <div className="p-6 flex flex-col flex-1">
                   <div className="flex items-center justify-between mb-3">

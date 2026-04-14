@@ -83,31 +83,43 @@ export type Database = {
       }
       courses: {
         Row: {
+          color: string | null
+          course_type: string
           created_at: string
           description: string | null
           id: string
           instructor_name: string
           join_code: string
+          price: number | null
+          start_date: string | null
           title: string
           updated_at: string
           user_id: string | null
         }
         Insert: {
+          color?: string | null
+          course_type?: string
           created_at?: string
           description?: string | null
           id?: string
           instructor_name: string
           join_code?: string
+          price?: number | null
+          start_date?: string | null
           title: string
           updated_at?: string
           user_id?: string | null
         }
         Update: {
+          color?: string | null
+          course_type?: string
           created_at?: string
           description?: string | null
           id?: string
           instructor_name?: string
           join_code?: string
+          price?: number | null
+          start_date?: string | null
           title?: string
           updated_at?: string
           user_id?: string | null
