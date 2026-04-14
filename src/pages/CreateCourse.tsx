@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Calendar, Users, Check, Palette, Lock, Globe, DollarSign, UserCheck } from "lucide-react";
+import { ArrowLeft, Calendar, Users, Palette, Lock, Globe, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
 import Button from "@/components/Button";
 import { useAuth } from "@/hooks/useAuth";
@@ -199,34 +199,52 @@ const CreateCourse = () => {
 
       {/* Live Preview Card */}
       <div className={`rounded-3xl p-8 md:p-12 mb-8 transition-colors duration-300 relative ${selectedColor}`}>
-        {/* Color picker button */}
-        <div className="absolute top-4 right-4" ref={colorPickerRef}>
-          <button
-            onClick={() => setColorPickerOpen(!colorPickerOpen)}
-            className="w-8 h-8 rounded-full bg-foreground/10 hover:bg-foreground/20 transition-colors flex items-center justify-center"
-          >
-            <Palette className="w-4 h-4" />
-          </button>
-          {colorPickerOpen && (
-            <div className="absolute right-0 top-10 bg-background rounded-2xl shadow-lg p-3 grid grid-cols-4 gap-2 z-10">
-              {COLOR_OPTIONS.map((c) => (
-                <button
-                  key={c.class}
-                  onClick={() => {
-                    setSelectedColor(c.class);
-                    setColorPickerOpen(false);
-                  }}
-                  className={`w-8 h-8 rounded-full ${c.class} border-2 transition-all ${
-                    selectedColor === c.class
-                      ? "border-foreground scale-110"
-                      : "border-transparent hover:scale-105"
-                  } flex items-center justify-center`}
-                >
-                  {selectedColor === c.class && <Check className="w-3 h-3 text-foreground" />}
-                </button>
-              ))}
+        {/* Top row: Start Date, Students/Attendance, Color picker */}
+        <div className="absolute top-4 right-4 flex items-center gap-3">
+          {/* Start Date */}
+          {startDate && (
+            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-foreground/70 bg-foreground/10 px-3 py-1.5 rounded-full">
+              <Calendar className="w-3.5 h-3.5" />
+              {new Date(startDate + "T00:00:00").toLocaleDateString()}
             </div>
           )}
+          
+          {/* Students/Attendance unified badge */}
+          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-foreground/70 bg-foreground/10 px-3 py-1.5 rounded-full">
+            <Users className="w-3.5 h-3.5" />
+            <span>{enrolledCount}</span>
+            <span className="text-foreground/50">/</span>
+            <span>{attendanceCount}</span>
+          </div>
+          
+          {/* Color picker button */}
+          <div className="relative" ref={colorPickerRef}>
+            <button
+              onClick={() => setColorPickerOpen(!colorPickerOpen)}
+              className="w-8 h-8 rounded-full bg-foreground/10 hover:bg-foreground/20 transition-colors flex items-center justify-center"
+            >
+              <Palette className="w-4 h-4" />
+            </button>
+            {colorPickerOpen && (
+              <div className="absolute right-0 top-10 bg-background rounded-2xl shadow-lg p-3 grid grid-cols-4 gap-2 z-10">
+                {COLOR_OPTIONS.map((c) => (
+                  <button
+                    key={c.class}
+                    onClick={() => {
+                      setSelectedColor(c.class);
+                      setColorPickerOpen(false);
+                    }}
+                    className={`w-8 h-8 rounded-full ${c.class} border-2 transition-all ${
+                      selectedColor === c.class
+                        ? "border-foreground scale-110"
+                        : "border-transparent hover:scale-105"
+                    }`}
+                    title={c.name}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Instructor name (auto) */}
@@ -283,22 +301,16 @@ const CreateCourse = () => {
         )}
         {errors.description && <p className="text-accent-red text-xs mt-1 font-sans">{errors.description}</p>}
 
-        {/* Stats row */}
-        <div className="mt-6 flex items-center gap-4 text-sm text-foreground/60 font-sans flex-wrap">
-          {startDate && (
-            <span className="flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5" />
-              {new Date(startDate + "T00:00:00").toLocaleDateString()}
+        {/* Instructor row */}
+        <div className="flex flex-wrap items-center gap-3 mb-4 mt-12">
+          <span className="text-xs font-bold uppercase tracking-wider text-foreground/60">
+            {instructorName}
+          </span>
+          {courseType !== "free" && (
+            <span className="text-xs font-bold uppercase tracking-wider bg-foreground/10 px-2 py-0.5 rounded-full">
+              {courseType === "paid" ? `$${price || "0"}` : "Private"}
             </span>
           )}
-          <span className="flex items-center gap-1">
-            <Users className="w-3.5 h-3.5" />
-            {enrolledCount} enrolled
-          </span>
-          <span className="flex items-center gap-1">
-            <UserCheck className="w-3.5 h-3.5" />
-            {enrolledCount}/{attendanceCount}
-          </span>
         </div>
       </div>
 
