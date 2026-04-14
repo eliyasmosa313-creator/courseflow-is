@@ -199,53 +199,25 @@ const CreateCourse = () => {
 
       {/* Live Preview Card */}
       <div className={`rounded-3xl p-8 md:p-12 mb-8 transition-colors duration-300 relative ${selectedColor}`}>
-        {/* Top row: Start Date, Students/Attendance, Color picker */}
-        <div className="absolute top-4 right-4 flex items-center gap-3">
-          {/* Start Date */}
-          {startDate && (
-            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-foreground/70 bg-foreground/10 px-3 py-1.5 rounded-full">
-              <Calendar className="w-3.5 h-3.5" />
-              {new Date(startDate + "T00:00:00").toLocaleDateString()}
-            </div>
-          )}
-          
-          {/* Students/Attendance unified badge */}
-          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-foreground/70 bg-foreground/10 px-3 py-1.5 rounded-full">
-            <Users className="w-3.5 h-3.5" />
-            <span>{enrolledCount}</span>
-            <span className="text-foreground/50">/</span>
-            <span>{attendanceCount}</span>
-          </div>
-          
-          {/* Color picker button */}
-          <div className="relative" ref={colorPickerRef}>
-            <button
-              onClick={() => setColorPickerOpen(!colorPickerOpen)}
-              className="w-8 h-8 rounded-full bg-foreground/10 hover:bg-foreground/20 transition-colors flex items-center justify-center"
-            >
-              <Palette className="w-4 h-4" />
-            </button>
-            {colorPickerOpen && (
-              <div className="absolute right-0 top-10 bg-background rounded-2xl shadow-lg p-3 grid grid-cols-4 gap-2 z-10">
-                {COLOR_OPTIONS.map((c) => (
-                  <button
-                    key={c.class}
-                    onClick={() => {
-                      setSelectedColor(c.class);
-                      setColorPickerOpen(false);
-                    }}
-                    className={`w-8 h-8 rounded-full ${c.class} border-2 transition-all ${
-                      selectedColor === c.class
-                        ? "border-foreground scale-110"
-                        : "border-transparent hover:scale-105"
-                    }`}
-                    title={c.name}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+        {/* Top row: Course type badge (left) + Students pill (right) — matching session card layout */}
+        <div className="flex items-center justify-between mb-3">
+          <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border-2 border-foreground/20 ${
+            courseType === "private" ? "bg-foreground/10 text-foreground" :
+            courseType === "paid" ? "bg-vibrant-yellow text-foreground" :
+            "bg-vibrant-mint text-foreground"
+          }`}>
+            {courseType === "private" ? "🔒 PRIVATE" : courseType === "paid" ? `💰 $${price || "0"}` : "🌐 FREE"}
+          </span>
+          <span className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-foreground/50">
+            <Users className="w-3 h-3" />
+            {enrolledCount}/{attendanceCount}
+          </span>
         </div>
+
+        {/* Instructor name */}
+        <span className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-2 block">
+          {instructorName}
+        </span>
 
         {/* Inline editable title */}
         {editingTitle ? (
@@ -289,16 +261,44 @@ const CreateCourse = () => {
         )}
         {errors.description && <p className="text-accent-red text-xs mt-1 font-sans">{errors.description}</p>}
 
-        {/* Instructor row */}
-        <div className="flex flex-wrap items-center gap-3 mb-4 mt-12">
-          <span className="text-xs font-bold uppercase tracking-wider text-foreground/60">
-            {instructorName}
-          </span>
-          {courseType !== "free" && (
-            <span className="text-xs font-bold uppercase tracking-wider bg-foreground/10 px-2 py-0.5 rounded-full">
-              {courseType === "paid" ? `$${price || "0"}` : "Private"}
-            </span>
-          )}
+        {/* Bottom row: Start date + Color picker */}
+        <div className="flex items-center justify-between mt-6">
+          <div className="flex items-center gap-3 text-sm text-foreground/60 font-sans">
+            {startDate && (
+              <span className="flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5" />
+                {new Date(startDate + "T00:00:00").toLocaleDateString()} · STARTS
+              </span>
+            )}
+          </div>
+          {/* Color picker */}
+          <div className="relative" ref={colorPickerRef}>
+            <button
+              onClick={() => setColorPickerOpen(!colorPickerOpen)}
+              className="w-8 h-8 rounded-full bg-foreground/10 hover:bg-foreground/20 transition-colors flex items-center justify-center"
+            >
+              <Palette className="w-4 h-4" />
+            </button>
+            {colorPickerOpen && (
+              <div className="absolute right-0 bottom-10 bg-background rounded-2xl shadow-lg p-3 grid grid-cols-4 gap-2 z-10">
+                {COLOR_OPTIONS.map((c) => (
+                  <button
+                    key={c.class}
+                    onClick={() => {
+                      setSelectedColor(c.class);
+                      setColorPickerOpen(false);
+                    }}
+                    className={`w-8 h-8 rounded-full ${c.class} border-2 transition-all ${
+                      selectedColor === c.class
+                        ? "border-foreground scale-110"
+                        : "border-transparent hover:scale-105"
+                    }`}
+                    title={c.name}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
