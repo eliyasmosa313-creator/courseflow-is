@@ -197,107 +197,116 @@ const CreateCourse = () => {
         </div>
       )}
 
-      {/* Live Preview Card */}
-      <div className={`rounded-3xl p-8 md:p-12 mb-8 transition-colors duration-300 relative ${selectedColor}`}>
-        {/* Top row: Course type badge (left) + Students pill (right) — matching session card layout */}
-        <div className="flex items-center justify-between mb-3">
+      {/* Live Preview Card — matches SessionCard layout exactly */}
+      <div className={`rounded-3xl overflow-hidden flex flex-col transition-colors duration-300 relative ${selectedColor}`}>
+        {/* Top bar — same as SessionCard */}
+        <div className="p-5 pb-0 flex items-center justify-between">
           <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border-2 border-foreground/20 ${
-            courseType === "private" ? "bg-foreground/10 text-foreground" :
+            courseType === "private" ? "bg-foreground/10" :
             courseType === "paid" ? "bg-vibrant-yellow text-foreground" :
             "bg-vibrant-mint text-foreground"
           }`}>
-            {courseType === "private" ? "🔒 PRIVATE" : courseType === "paid" ? `💰 $${price || "0"}` : "🌐 FREE"}
+            {courseType === "private" ? "PRIVATE" : courseType === "paid" ? "PAID" : "FREE"}
           </span>
-          <span className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-foreground/50">
-            <Users className="w-3 h-3" />
-            {enrolledCount}/{attendanceCount}
+          <span className="text-xs font-bold uppercase tracking-wider text-foreground/60">
+            {startDate ? new Date(startDate + "T00:00:00").toLocaleDateString() : "NO DATE"}
           </span>
         </div>
 
-        {/* Instructor name */}
-        <span className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-2 block">
-          {instructorName}
-        </span>
-
-        {/* Inline editable title */}
-        {editingTitle ? (
-          <input
-            ref={titleRef}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onBlur={() => setEditingTitle(false)}
-            onKeyDown={(e) => e.key === "Enter" && setEditingTitle(false)}
-            className="text-5xl md:text-7xl font-extrabold uppercase tracking-tighter leading-[0.8] font-sans mb-4 bg-transparent border-none outline-none w-full placeholder:text-foreground/30"
-            placeholder="COURSE TITLE"
-          />
-        ) : (
-          <h2
-            onClick={() => setEditingTitle(true)}
-            className="text-5xl md:text-7xl font-extrabold uppercase tracking-tighter leading-[0.8] font-sans mb-4 cursor-text hover:opacity-70 transition-opacity"
-          >
-            {title || <span className="text-foreground/30">COURSE TITLE</span>}
-          </h2>
-        )}
-        {errors.title && <p className="text-accent-red text-xs mb-2 font-sans">{errors.title}</p>}
-
-        {/* Inline editable description */}
-        {editingDesc ? (
-          <textarea
-            ref={descRef}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            onBlur={() => setEditingDesc(false)}
-            rows={2}
-            className="text-base md:text-lg font-serif max-w-2xl bg-transparent border-none outline-none w-full resize-none placeholder:text-foreground/30"
-            placeholder="Click to add course description..."
-          />
-        ) : (
-          <p
-            onClick={() => setEditingDesc(true)}
-            className="text-base md:text-lg text-foreground/80 font-serif max-w-2xl cursor-text hover:opacity-70 transition-opacity"
-          >
-            {description || <span className="text-foreground/30">Click to add course description...</span>}
-          </p>
-        )}
-        {errors.description && <p className="text-accent-red text-xs mt-1 font-sans">{errors.description}</p>}
-
-        {/* Bottom row: Start date + Color picker */}
-        <div className="flex items-center justify-between mt-6">
-          <div className="flex items-center gap-3 text-sm text-foreground/60 font-sans">
-            {startDate && (
-              <span className="flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" />
-                {new Date(startDate + "T00:00:00").toLocaleDateString()} · STARTS
-              </span>
-            )}
-          </div>
-          {/* Color picker */}
-          <div className="relative" ref={colorPickerRef}>
-            <button
-              onClick={() => setColorPickerOpen(!colorPickerOpen)}
-              className="w-8 h-8 rounded-full bg-foreground/10 hover:bg-foreground/20 transition-colors flex items-center justify-center"
+        {/* Content — same as SessionCard */}
+        <div className="p-5 md:p-6 flex flex-col flex-1">
+          {/* Inline editable title */}
+          {editingTitle ? (
+            <input
+              ref={titleRef}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onBlur={() => setEditingTitle(false)}
+              onKeyDown={(e) => e.key === "Enter" && setEditingTitle(false)}
+              className="text-3xl md:text-4xl font-extrabold uppercase tracking-tighter leading-[0.85] font-sans mb-3 bg-transparent border-none outline-none w-full placeholder:text-foreground/30"
+              placeholder="COURSE TITLE"
+            />
+          ) : (
+            <h2
+              onClick={() => setEditingTitle(true)}
+              className="text-3xl md:text-4xl leading-[0.85] mb-3 font-sans font-extrabold tracking-tighter cursor-text hover:opacity-70 transition-opacity"
             >
-              <Palette className="w-4 h-4" />
-            </button>
-            {colorPickerOpen && (
-              <div className="absolute right-0 bottom-10 bg-background rounded-2xl shadow-lg p-3 grid grid-cols-4 gap-2 z-10">
-                {COLOR_OPTIONS.map((c) => (
-                  <button
-                    key={c.class}
-                    onClick={() => {
-                      setSelectedColor(c.class);
-                      setColorPickerOpen(false);
-                    }}
-                    className={`w-8 h-8 rounded-full ${c.class} border-2 transition-all ${
-                      selectedColor === c.class
-                        ? "border-foreground scale-110"
-                        : "border-transparent hover:scale-105"
-                    }`}
-                    title={c.name}
-                  />
-                ))}
-              </div>
-            )}
+              {title || <span className="text-foreground/30">COURSE TITLE</span>}
+            </h2>
+          )}
+          {errors.title && <p className="text-accent-red text-xs mb-2 font-sans">{errors.title}</p>}
+
+          {/* Instructor — same as SessionCard */}
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-6 h-6 rounded-full bg-foreground/20 flex items-center justify-center text-xs font-bold">
+              {instructorName.charAt(0).toUpperCase()}
+            </div>
+            <span className="text-sm font-medium text-foreground/70">{instructorName}</span>
+          </div>
+
+          {/* Meta — same as SessionCard */}
+          <div className="flex items-center gap-4 text-sm text-foreground/60 mb-4 font-sans">
+            <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{startDate || "Set date"}</span>
+            <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" />{enrolledCount}/{attendanceCount}</span>
+          </div>
+
+          {/* Inline editable description */}
+          {editingDesc ? (
+            <textarea
+              ref={descRef}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              onBlur={() => setEditingDesc(false)}
+              rows={2}
+              className="text-sm font-serif mb-4 bg-transparent border-none outline-none w-full resize-none placeholder:text-foreground/30"
+              placeholder="Click to add course description..."
+            />
+          ) : (
+            <p
+              onClick={() => setEditingDesc(true)}
+              className="text-sm text-foreground/70 font-serif mb-4 line-clamp-2 cursor-text hover:opacity-70 transition-opacity"
+            >
+              {description || <span className="text-foreground/30">Click to add course description...</span>}
+            </p>
+          )}
+          {errors.description && <p className="text-accent-red text-xs mb-2 font-sans">{errors.description}</p>}
+
+          <div className="mt-auto flex items-center justify-between">
+            <Button
+              variant="filled"
+              className="text-xs py-2 px-5 self-start"
+              showArrow
+            >
+              VIEW COURSE
+            </Button>
+            {/* Color picker */}
+            <div className="relative" ref={colorPickerRef}>
+              <button
+                onClick={() => setColorPickerOpen(!colorPickerOpen)}
+                className="w-8 h-8 rounded-full bg-foreground/10 hover:bg-foreground/20 transition-colors flex items-center justify-center"
+              >
+                <Palette className="w-4 h-4" />
+              </button>
+              {colorPickerOpen && (
+                <div className="absolute right-0 bottom-10 bg-background rounded-2xl shadow-lg p-3 grid grid-cols-4 gap-2 z-10">
+                  {COLOR_OPTIONS.map((c) => (
+                    <button
+                      key={c.class}
+                      onClick={() => {
+                        setSelectedColor(c.class);
+                        setColorPickerOpen(false);
+                      }}
+                      className={`w-8 h-8 rounded-full ${c.class} border-2 transition-all ${
+                        selectedColor === c.class
+                          ? "border-foreground scale-110"
+                          : "border-transparent hover:scale-105"
+                      }`}
+                      title={c.name}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

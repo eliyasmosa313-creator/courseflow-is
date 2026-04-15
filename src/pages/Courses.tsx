@@ -236,30 +236,47 @@ const Courses = () => {
               <article
                 className={`card-hover rounded-3xl overflow-hidden flex flex-col h-full ${(course as any).color || colors[i % colors.length]}`}
               >
-                <div className="p-6 flex flex-col flex-1">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-bold uppercase tracking-wider text-foreground/60">
-                      {course.instructor_name}
-                    </span>
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        copyJoinCode(course.join_code);
-                      }}
-                      className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider bg-foreground/10 px-2 py-1 rounded-full hover:bg-foreground/20 transition-colors"
-                    >
-                      {copiedCode === course.join_code ? (
-                        <Check className="w-3 h-3" />
-                      ) : (
-                        <Copy className="w-3 h-3" />
-                      )}
-                      {course.join_code}
-                    </button>
-                  </div>
+                {/* Top bar — matches SessionCard */}
+                <div className="p-5 pb-0 flex items-center justify-between">
+                  <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border-2 border-foreground/20 ${
+                    (course as any).course_type === "private" ? "bg-foreground/10" :
+                    (course as any).course_type === "paid" ? "bg-vibrant-yellow text-foreground" :
+                    "bg-vibrant-mint text-foreground"
+                  }`}>
+                    {((course as any).course_type || "free").toUpperCase()}
+                  </span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-foreground/60">
+                    {(course as any).start_date
+                      ? new Date((course as any).start_date + "T00:00:00").toLocaleDateString()
+                      : "NO DATE"}
+                  </span>
+                </div>
 
-                  <h2 className="text-2xl md:text-3xl leading-[0.85] mb-3 font-sans font-extrabold tracking-tighter uppercase">
+                {/* Content — matches SessionCard */}
+                <div className="p-5 md:p-6 flex flex-col flex-1">
+                  <h2 className="text-3xl md:text-4xl leading-[0.85] mb-3 font-sans font-extrabold tracking-tighter">
                     {course.title}
                   </h2>
+
+                  {/* Instructor */}
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-6 h-6 rounded-full bg-foreground/20 flex items-center justify-center text-xs font-bold">
+                      {course.instructor_name.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-sm font-medium text-foreground/70">{course.instructor_name}</span>
+                  </div>
+
+                  {/* Meta */}
+                  <div className="flex items-center gap-4 text-sm text-foreground/60 mb-4 font-sans">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {(course as any).start_date || "No date"}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Users className="w-3.5 h-3.5" />
+                      {(course.course_enrollments as any)?.[0]?.count ?? 0}/{(course.sessions as any)?.[0]?.count ?? 0}
+                    </span>
+                  </div>
 
                   {course.description && (
                     <p className="text-sm text-foreground/70 font-serif mb-4 line-clamp-2">
@@ -268,16 +285,13 @@ const Courses = () => {
                   )}
 
                   <div className="mt-auto flex items-center justify-between">
-                    <div className="flex items-center gap-4 text-sm text-foreground/60 font-sans">
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5" />
-                        {(course.course_enrollments as any)?.[0]?.count ?? 0} students
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <BookOpen className="w-3.5 h-3.5" />
-                        {(course.sessions as any)?.[0]?.count ?? 0} sessions
-                      </span>
-                    </div>
+                    <Button
+                      variant="filled"
+                      className="text-xs py-2 px-5 self-start"
+                      showArrow
+                    >
+                      VIEW COURSE
+                    </Button>
                     {isInstructor && (
                       <div className="flex items-center gap-1">
                         <button
