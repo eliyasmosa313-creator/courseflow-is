@@ -103,13 +103,12 @@ const CourseSessionDetail = () => {
       const filePath = `${sessionId}/${Date.now()}-${file.name}`;
       const { error: uploadError } = await supabase.storage.from("materials").upload(filePath, file);
       if (uploadError) throw uploadError;
-      const { data: urlData } = supabase.storage.from("materials").getPublicUrl(filePath);
       const fileType = file.type.startsWith("image/") ? "image" : "pdf";
       const { error } = await supabase.from("session_materials").insert({
         session_id: sessionId!,
         title: file.name,
         type: fileType,
-        file_url: urlData.publicUrl,
+        file_url: filePath,
       });
       if (error) throw error;
     },
@@ -291,9 +290,24 @@ const CourseSessionDetail = () => {
                   <p className="text-xs text-foreground/50 uppercase">{m.type}</p>
                 </div>
                 {m.file_url && (
-                  <a href={m.file_url} target="_blank" rel="noopener noreferrer" className="p-2 rounded-xl hover:bg-foreground/10 transition-colors">
+                  <button
+                    onClick={async () => {
+                      // If file_url is a storage path, sign it; if it's an http(s) URL (legacy/external link), open as-is
+                      if (/^https?:\/\//i.test(m.file_url)) {
+                        window.open(m.file_url, "_blank", "noopener,noreferrer");
+                        return;
+                      }
+                      const { data, error } = await supabase.storage
+                        .from("materials")
+                        .createSignedUrl(m.file_url, 60 * 10);
+                      if (!error && data?.signedUrl) {
+                        window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+                      }
+                    }}
+                    className="p-2 rounded-xl hover:bg-foreground/10 transition-colors"
+                  >
                     <Download className="w-4 h-4" />
-                  </a>
+                  </button>
                 )}
               </div>
             ))}
