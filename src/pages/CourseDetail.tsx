@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Plus, Clock, Copy, Check, Users, UserPlus, Pencil, Trash2, Lock, Globe } from "lucide-react";
+import { ArrowLeft, Plus, Clock, Copy, Check, Users, UserPlus, Pencil, Trash2, Lock, Globe, Calendar } from "lucide-react";
 import Button from "@/components/Button";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -203,11 +203,15 @@ const CourseDetail = () => {
         <ArrowLeft className="w-4 h-4" /> BACK TO COURSES
       </Link>
 
-      {/* Course Hero */}
-      <div className="rounded-3xl bg-vibrant-purple p-8 md:p-12 mb-8">
+      {/* Course Hero — matches SessionDetail layout */}
+      <div className={`rounded-3xl p-8 md:p-12 mb-8 ${(course as any).color || "bg-vibrant-purple"}`}>
         <div className="flex flex-wrap items-center gap-3 mb-4">
-          <span className="text-xs font-bold uppercase tracking-wider text-foreground/60">
-            {course.instructor_name}
+          <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border-2 border-foreground/20 ${
+            (course as any).course_type === "private" ? "bg-foreground/10" :
+            (course as any).course_type === "paid" ? "bg-vibrant-yellow text-foreground" :
+            "bg-vibrant-mint text-foreground"
+          }`}>
+            {((course as any).course_type || "free").toUpperCase()}
           </span>
           <button
             onClick={() => {
@@ -222,15 +226,33 @@ const CourseDetail = () => {
           </button>
         </div>
 
-        <h1 className="text-5xl md:text-7xl font-extrabold uppercase tracking-tighter leading-[0.8] font-sans mb-4">
+        <h1 className="text-5xl md:text-7xl font-extrabold uppercase tracking-tighter leading-[0.8] font-sans mb-6">
           {course.title}
         </h1>
 
         {course.description && (
-          <p className="text-base md:text-lg text-foreground/80 font-serif max-w-2xl">
+          <p className="text-base md:text-lg text-foreground/80 font-serif mb-6 max-w-2xl">
             {course.description}
           </p>
         )}
+
+        <div className="flex flex-wrap gap-6 text-sm font-sans text-foreground/70 mb-6">
+          {(course as any).start_date && (
+            <span className="flex items-center gap-2"><Calendar className="w-4 h-4" />{(course as any).start_date}</span>
+          )}
+          <span className="flex items-center gap-2"><Users className="w-4 h-4" />{enrollments?.length ?? 0} students</span>
+          <span className="flex items-center gap-2"><Clock className="w-4 h-4" />{sessions?.length ?? 0} sessions</span>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-foreground/20 flex items-center justify-center text-sm font-bold">
+            {course.instructor_name.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <p className="font-bold text-sm font-sans">{course.instructor_name}</p>
+            <p className="text-xs text-foreground/50">Instructor</p>
+          </div>
+        </div>
       </div>
 
       {/* Actions */}
