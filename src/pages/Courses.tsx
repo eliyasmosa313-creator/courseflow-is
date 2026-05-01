@@ -114,13 +114,13 @@ const Courses = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-4xl md:text-5xl font-extrabold uppercase tracking-tighter font-sans leading-[0.85]">
+          <h1 className="text-5xl md:text-7xl font-extrabold uppercase tracking-tighter leading-[0.8] font-sans">
             COURSES
           </h1>
-          <p className="text-foreground/60 font-serif mt-2">
-            Manage your courses and learning tracks
+          <p className="text-base text-foreground/60 mt-3 font-serif">
+            Manage your courses and learning tracks.
           </p>
         </div>
         {isInstructor && (
