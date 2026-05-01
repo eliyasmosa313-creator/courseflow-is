@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Calendar, Users, Palette, Lock, Globe, DollarSign } from "lucide-react";
+import { ArrowLeft, Lock, Globe, DollarSign, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import Button from "@/components/Button";
 import { useAuth } from "@/hooks/useAuth";
@@ -52,43 +52,12 @@ const CreateCourse = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedColor, setSelectedColor] = useState(COLOR_OPTIONS[0].class);
-  const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [courseType, setCourseType] = useState<CourseType>("free");
   const [price, setPrice] = useState("");
 
-  // Inline editing
-  const [editingTitle, setEditingTitle] = useState(false);
-  const [editingDesc, setEditingDesc] = useState(false);
-  const titleRef = useRef<HTMLInputElement>(null);
-  const descRef = useRef<HTMLTextAreaElement>(null);
-  const colorPickerRef = useRef<HTMLDivElement>(null);
-
   // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Mock stats
-  const enrolledCount = 0;
-  const attendanceCount = 0;
-
-  useEffect(() => {
-    if (editingTitle && titleRef.current) titleRef.current.focus();
-  }, [editingTitle]);
-
-  useEffect(() => {
-    if (editingDesc && descRef.current) descRef.current.focus();
-  }, [editingDesc]);
-
-  // Close color picker on outside click
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (colorPickerRef.current && !colorPickerRef.current.contains(e.target as Node)) {
-        setColorPickerOpen(false);
-      }
-    };
-    if (colorPickerOpen) document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [colorPickerOpen]);
 
   const validate = () => {
     const errs: Record<string, string> = {};
@@ -140,7 +109,7 @@ const CreateCourse = () => {
   };
 
   return (
-    <div>
+    <div className="max-w-3xl">
       <Link
         to="/courses"
         className="inline-flex items-center gap-2 text-foreground/60 hover:text-foreground transition-colors mb-6 nav-text"
@@ -148,202 +117,150 @@ const CreateCourse = () => {
         <ArrowLeft className="w-4 h-4" /> BACK TO COURSES
       </Link>
 
-      <h1 className="text-4xl md:text-5xl font-extrabold uppercase tracking-tighter font-sans leading-[0.85] mb-8">
-        CREATE COURSE
-      </h1>
-
-      {/* Course Type Toggle */}
-      <div className="mb-6">
-        <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-2 block">
-          Course Type
-        </label>
-        <div className="inline-flex rounded-2xl bg-muted p-1 gap-1">
-          {COURSE_TYPES.map((ct) => (
-            <button
-              key={ct.value}
-              onClick={() => setCourseType(ct.value)}
-              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
-                courseType === ct.value
-                  ? "bg-foreground text-background shadow-sm"
-                  : "text-foreground/60 hover:text-foreground"
-              }`}
-            >
-              <ct.icon className="w-3.5 h-3.5" />
-              {ct.label}
-            </button>
-          ))}
-        </div>
+      <div className="mb-8">
+        <h1 className="text-5xl md:text-7xl font-extrabold uppercase tracking-tighter leading-[0.8] font-sans">
+          NEW COURSE
+        </h1>
+        <p className="text-base text-foreground/60 mt-3 font-serif">
+          Fill in the details below to publish a new course.
+        </p>
       </div>
 
-      {/* Price input for paid courses */}
-      {courseType === "paid" && (
-        <div className="mb-6">
-          <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">
-            Price (USD) *
+      <div className="rounded-3xl bg-muted p-6 md:p-8 space-y-8">
+        {/* Title */}
+        <div>
+          <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-2 block">
+            Course Title <span className="text-accent-red">*</span>
           </label>
-          <div className="relative w-48">
-            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/40" />
-            <input
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className="w-full pl-8 pr-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="29.99"
-              min="0"
-              step="0.01"
-            />
-          </div>
-          {errors.price && <p className="text-accent-red text-xs mt-1 font-sans">{errors.price}</p>}
-        </div>
-      )}
-
-      {/* Live Preview Card — matches SessionCard layout exactly */}
-      <div className={`rounded-3xl overflow-hidden flex flex-col transition-colors duration-300 relative ${selectedColor}`}>
-        {/* Top bar — same as SessionCard */}
-        <div className="p-5 pb-0 flex items-center justify-between">
-          <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border-2 border-foreground/20 ${
-            courseType === "private" ? "bg-foreground/10" :
-            courseType === "paid" ? "bg-vibrant-yellow text-foreground" :
-            "bg-vibrant-mint text-foreground"
-          }`}>
-            {courseType === "private" ? "PRIVATE" : courseType === "paid" ? "PAID" : "FREE"}
-          </span>
-          <span className="text-xs font-bold uppercase tracking-wider text-foreground/60">
-            {startDate ? new Date(startDate + "T00:00:00").toLocaleDateString() : "NO DATE"}
-          </span>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g. Advanced React Patterns"
+            className="w-full px-4 py-3 rounded-2xl bg-background border-2 border-transparent text-foreground font-sans text-sm focus:outline-none focus:border-foreground transition-colors"
+          />
+          {errors.title && <p className="text-accent-red text-xs mt-1 font-sans">{errors.title}</p>}
         </div>
 
-        {/* Content — same as SessionCard */}
-        <div className="p-5 md:p-6 flex flex-col flex-1">
-          {/* Inline editable title */}
-          {editingTitle ? (
-            <input
-              ref={titleRef}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onBlur={() => setEditingTitle(false)}
-              onKeyDown={(e) => e.key === "Enter" && setEditingTitle(false)}
-              className="text-3xl md:text-4xl font-extrabold uppercase tracking-tighter leading-[0.85] font-sans mb-3 bg-transparent border-none outline-none w-full placeholder:text-foreground/30"
-              placeholder="COURSE TITLE"
-            />
-          ) : (
-            <h2
-              onClick={() => setEditingTitle(true)}
-              className="text-3xl md:text-4xl leading-[0.85] mb-3 font-sans font-extrabold tracking-tighter cursor-text hover:opacity-70 transition-opacity"
-            >
-              {title || <span className="text-foreground/30">COURSE TITLE</span>}
-            </h2>
-          )}
-          {errors.title && <p className="text-accent-red text-xs mb-2 font-sans">{errors.title}</p>}
-
-          {/* Instructor — same as SessionCard */}
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-6 h-6 rounded-full bg-foreground/20 flex items-center justify-center text-xs font-bold">
-              {instructorName.charAt(0).toUpperCase()}
-            </div>
-            <span className="text-sm font-medium text-foreground/70">{instructorName}</span>
-          </div>
-
-          {/* Meta — same as SessionCard */}
-          <div className="flex items-center gap-4 text-sm text-foreground/60 mb-4 font-sans">
-            <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{startDate || "Set date"}</span>
-            <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" />{enrolledCount}/{attendanceCount}</span>
-          </div>
-
-          {/* Inline editable description */}
-          {editingDesc ? (
-            <textarea
-              ref={descRef}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              onBlur={() => setEditingDesc(false)}
-              rows={2}
-              className="text-sm font-serif mb-4 bg-transparent border-none outline-none w-full resize-none placeholder:text-foreground/30"
-              placeholder="Click to add course description..."
-            />
-          ) : (
-            <p
-              onClick={() => setEditingDesc(true)}
-              className="text-sm text-foreground/70 font-serif mb-4 line-clamp-2 cursor-text hover:opacity-70 transition-opacity"
-            >
-              {description || <span className="text-foreground/30">Click to add course description...</span>}
-            </p>
-          )}
-          {errors.description && <p className="text-accent-red text-xs mb-2 font-sans">{errors.description}</p>}
-
-          <div className="mt-auto flex items-center justify-between">
-            <Button
-              variant="filled"
-              className="text-xs py-2 px-5 self-start"
-              showArrow
-            >
-              VIEW COURSE
-            </Button>
-            {/* Color picker */}
-            <div className="relative" ref={colorPickerRef}>
-              <button
-                onClick={() => setColorPickerOpen(!colorPickerOpen)}
-                className="w-8 h-8 rounded-full bg-foreground/10 hover:bg-foreground/20 transition-colors flex items-center justify-center"
-              >
-                <Palette className="w-4 h-4" />
-              </button>
-              {colorPickerOpen && (
-                <div className="absolute right-0 bottom-10 bg-background rounded-2xl shadow-lg p-3 grid grid-cols-4 gap-2 z-10">
-                  {COLOR_OPTIONS.map((c) => (
-                    <button
-                      key={c.class}
-                      onClick={() => {
-                        setSelectedColor(c.class);
-                        setColorPickerOpen(false);
-                      }}
-                      className={`w-8 h-8 rounded-full ${c.class} border-2 transition-all ${
-                        selectedColor === c.class
-                          ? "border-foreground scale-110"
-                          : "border-transparent hover:scale-105"
-                      }`}
-                      title={c.name}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+        {/* Description */}
+        <div>
+          <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-2 block">
+            Description <span className="text-accent-red">*</span>
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            placeholder="What will students learn in this course?"
+            className="w-full px-4 py-3 rounded-2xl bg-background border-2 border-transparent text-foreground font-sans text-sm focus:outline-none focus:border-foreground transition-colors resize-none"
+          />
+          {errors.description && <p className="text-accent-red text-xs mt-1 font-sans">{errors.description}</p>}
         </div>
-      </div>
 
-      {/* Additional Fields */}
-      <div className="space-y-6 mb-10">
         {/* Start Date */}
         <div>
-          <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">
-            Start Date *
+          <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-2 block">
+            Start Date <span className="text-accent-red">*</span>
           </label>
           <input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full max-w-xs px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full max-w-xs px-4 py-3 rounded-2xl bg-background border-2 border-transparent text-foreground font-sans text-sm focus:outline-none focus:border-foreground transition-colors"
           />
           {errors.startDate && <p className="text-accent-red text-xs mt-1 font-sans">{errors.startDate}</p>}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-3 pt-4">
-          <Button
-            variant="filled"
-            onClick={handleCreate}
-            className="flex-1"
-          >
-            {createMutation.isPending ? "CREATING..." : "CREATE COURSE"}
-          </Button>
-          <Button
-            variant="transparent"
-            onClick={() => navigate("/courses")}
-            className="flex-1"
-          >
-            CANCEL
-          </Button>
+        {/* Course Type */}
+        <div>
+          <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-2 block">
+            Course Type
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {COURSE_TYPES.map((ct) => {
+              const active = courseType === ct.value;
+              return (
+                <button
+                  key={ct.value}
+                  type="button"
+                  onClick={() => setCourseType(ct.value)}
+                  className={`nav-text inline-flex items-center gap-2 px-5 py-2.5 rounded-full border-2 border-foreground transition-all duration-200 ${
+                    active
+                      ? "bg-foreground text-background"
+                      : "bg-transparent text-foreground hover:bg-foreground hover:text-background"
+                  }`}
+                >
+                  <ct.icon className="w-3.5 h-3.5" />
+                  {ct.label.toUpperCase()}
+                </button>
+              );
+            })}
+          </div>
         </div>
+
+        {/* Price (only for paid) */}
+        {courseType === "paid" && (
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-2 block">
+              Price (USD) <span className="text-accent-red">*</span>
+            </label>
+            <div className="relative w-48">
+              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/40" />
+              <input
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                className="w-full pl-9 pr-4 py-3 rounded-2xl bg-background border-2 border-transparent text-foreground font-sans text-sm focus:outline-none focus:border-foreground transition-colors"
+                placeholder="29.99"
+                min="0"
+                step="0.01"
+              />
+            </div>
+            {errors.price && <p className="text-accent-red text-xs mt-1 font-sans">{errors.price}</p>}
+          </div>
+        )}
+
+        {/* Card Color */}
+        <div>
+          <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-2 block">
+            Card Color
+          </label>
+          <div className="flex flex-wrap gap-3">
+            {COLOR_OPTIONS.map((c) => {
+              const active = selectedColor === c.class;
+              return (
+                <button
+                  key={c.class}
+                  type="button"
+                  onClick={() => setSelectedColor(c.class)}
+                  title={c.name}
+                  className={`w-10 h-10 rounded-full ${c.class} flex items-center justify-center transition-all border-2 ${
+                    active ? "border-foreground scale-110" : "border-foreground/10 hover:border-foreground/40"
+                  }`}
+                >
+                  {active && <Check className="w-4 h-4 text-foreground" strokeWidth={3} />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex gap-3 pt-6 mb-10">
+        <Button
+          variant="filled"
+          onClick={handleCreate}
+          className="flex-1"
+        >
+          {createMutation.isPending ? "CREATING..." : "CREATE COURSE"}
+        </Button>
+        <Button
+          variant="transparent"
+          onClick={() => navigate("/courses")}
+          className="flex-1"
+        >
+          CANCEL
+        </Button>
       </div>
     </div>
   );
