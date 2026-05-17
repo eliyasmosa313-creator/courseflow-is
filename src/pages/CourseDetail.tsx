@@ -271,6 +271,9 @@ const CourseDetail = () => {
           <Button variant="transparent" onClick={() => setShowJoinCode(true)}>
             <Users className="w-4 h-4 mr-2" /> JOIN WITH CODE
           </Button>
+          <Button variant="transparent" onClick={() => setShowAnnounce(true)}>
+            <Megaphone className="w-4 h-4 mr-2" /> ANNOUNCE
+          </Button>
           <Button variant="transparent" onClick={openEditCourse}>
             <Pencil className="w-4 h-4 mr-2" /> EDIT COURSE
           </Button>
