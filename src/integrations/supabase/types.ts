@@ -49,6 +49,45 @@ export type Database = {
           },
         ]
       }
+      course_drafts: {
+        Row: {
+          color: string | null
+          course_type: string | null
+          created_at: string
+          description: string | null
+          id: string
+          price: number | null
+          start_date: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          course_type?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          price?: number | null
+          start_date?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          course_type?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          price?: number | null
+          start_date?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       course_enrollments: {
         Row: {
           course_id: string
@@ -147,6 +186,45 @@ export type Database = {
           id?: string
           is_active?: boolean
           target_role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          link: string | null
+          message: string | null
+          session_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message?: string | null
+          session_id?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message?: string | null
+          session_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -423,7 +501,22 @@ export type Database = {
         }
         Returns: boolean
       }
+      notify_course_students: {
+        Args: {
+          _course_id: string
+          _link: string
+          _message: string
+          _session_id: string
+          _title: string
+          _type: string
+        }
+        Returns: undefined
+      }
       redeem_invitation_code: { Args: { p_code: string }; Returns: string }
+      send_course_announcement: {
+        Args: { _course_id: string; _message: string; _title: string }
+        Returns: number
+      }
     }
     Enums: {
       app_role: "viewer" | "student" | "instructor"
