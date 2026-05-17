@@ -2,9 +2,10 @@ import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Plus, Clock, Copy, Check, Users, UserPlus, Pencil, Trash2, Lock, Globe, Calendar } from "lucide-react";
+import { ArrowLeft, Plus, Clock, Copy, Check, Users, UserPlus, Pencil, Trash2, Lock, Globe, Calendar, Megaphone } from "lucide-react";
 import Button from "@/components/Button";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
 
 const CourseDetail = () => {
   const { id } = useParams();
@@ -20,6 +21,9 @@ const CourseDetail = () => {
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editInstructor, setEditInstructor] = useState("");
+  const [showAnnounce, setShowAnnounce] = useState(false);
+  const [announceTitle, setAnnounceTitle] = useState("");
+  const [announceMessage, setAnnounceMessage] = useState("");
 
   // Session form
   const [sessionTitle, setSessionTitle] = useState("");
