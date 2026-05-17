@@ -511,6 +511,54 @@ const CourseDetail = () => {
           ))}
         </div>
       )}
+
+      {/* Announcement Modal */}
+      {showAnnounce && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-3xl p-8 w-full max-w-lg">
+            <h2 className="text-2xl font-extrabold uppercase tracking-tight font-sans mb-2">SEND ANNOUNCEMENT</h2>
+            <p className="text-sm text-foreground/60 font-serif mb-6">
+              Notify all {enrollments?.length ?? 0} enrolled student{enrollments?.length === 1 ? "" : "s"} in this course.
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">Title</label>
+                <input value={announceTitle} onChange={(e) => setAnnounceTitle(e.target.value)}
+                  placeholder="e.g. Class moved to Friday"
+                  className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-1 block">Message</label>
+                <textarea value={announceMessage} onChange={(e) => setAnnounceMessage(e.target.value)} rows={4}
+                  placeholder="Share the details with your students..."
+                  className="w-full px-4 py-3 rounded-2xl bg-muted border-none text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="filled" className="flex-1" onClick={async () => {
+                  if (!announceTitle.trim()) {
+                    toast({ title: "Add a title for your announcement", variant: "destructive" });
+                    return;
+                  }
+                  const { error } = await supabase.rpc("send_course_announcement", {
+                    _course_id: id!,
+                    _title: announceTitle,
+                    _message: announceMessage,
+                  });
+                  if (error) {
+                    toast({ title: "Failed to send", description: error.message, variant: "destructive" });
+                  } else {
+                    toast({ title: "Announcement sent" });
+                    setAnnounceTitle("");
+                    setAnnounceMessage("");
+                    setShowAnnounce(false);
+                  }
+                }}>SEND</Button>
+                <Button variant="transparent" className="flex-1" onClick={() => setShowAnnounce(false)}>CANCEL</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
